@@ -1,0 +1,47 @@
+{
+  "name": "kr0lik/laravel-dto-to-swagger",
+  "description": "Generate swagger from dto and return type from action.",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "krolik",
+      "email": "krolik@yandex.ru"
+    }
+  ],
+  "require": {
+    "php": "^8.2",
+    "laravel/framework": "^10.0",
+    "phpdocumentor/reflection-docblock": "^5.3",
+    "zircote/swagger-php": "^4.8"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kr0lik\\DtoToSwagger\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Kr0lik\\DtoToSwagger\\DtoToSwaggerServiceProvider"
+      ]
+    }
+  },
+  "require-dev": {
+    "icanhazstring/composer-unused": "^0.8.11",
+    "kr0lik/php-cs-fixer": "^2.0",
+    "kr0lik/phpstan-rules": "^2.0"
+  },
+  "config": {
+    "preferred-install": {
+      "*": "dist"
+    },
+    "bin-dir": "bin",
+    "sort-packages": true
+  }
+}

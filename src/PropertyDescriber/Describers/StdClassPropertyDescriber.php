@@ -1,0 +1,24 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Kr0lik\DtoToSwagger\PropertyDescriber\Describers;
+
+use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriberInterface;
+use OpenApi\Annotations\Schema;
+use Symfony\Component\PropertyInfo\Type;
+
+class StdClassPropertyDescriber implements PropertyDescriberInterface
+{
+    public function describe(Schema $property, Type ...$types): void
+    {
+        $property->type = 'object';
+    }
+
+    public function supports(Type ...$types): bool
+    {
+        return 1 === count($types)
+            && Type::BUILTIN_TYPE_OBJECT === $types[0]->getBuiltinType()
+            && 'stdClass' === $types[0]->getClassName();
+    }
+}

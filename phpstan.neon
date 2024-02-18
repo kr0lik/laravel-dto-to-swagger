@@ -1,0 +1,19 @@
+includes:
+  - vendor/kr0lik/phpstan-rules/extensions/general-extension.neon
+
+parameters:
+    checkGenericClassInNonGenericObjectType: false
+    treatPhpDocTypesAsCertain: false
+    excludes_analyse:
+        - src/Helper/Util.php
+    ignoreErrors:
+        - '#Parameter \#1 \$objectOrClass of class Reflection.+ constructor expects .+ string given#'
+        - '#DtoToSwagger\\Attribute\\Security::\$_required type has no value type specified in iterable type array#'
+        -
+          message: '#PHPDoc tag @throws with type .+ is not compatible with parent#'
+          paths:
+                - src/OperationDescriber/Describers/*
+                - src/PropertyDescriber/Describers/*
+                - src/ReflectionPreparer/RefTypePreparer/Preparers/*
+                - src/ReflectionPreparer/DocTypePreparer/Preparers/*
+                - src/DtoToSwaggerServiceProvider.php
