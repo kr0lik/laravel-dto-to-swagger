@@ -1,6 +1,6 @@
 # laravel-dto-to-swagger
 
-Auto generation swagger from php types.
+Auto generation swagger from Laravel routing and strongly typed data for routes (Use DTO for request and response data).
 
 ## Install
 ```
@@ -10,7 +10,20 @@ Setup is extremely simple, just add the service provider to your app.php config.
 
 Kr0lik\DtoToSwagger\DtoToSwaggerServiceProvider::class,
 
-You can also publish the config so you can add your own param converters.
+You also need publish the config:
 ```
 $ php artisan vendor:publish --provider="Kr0lik\DtoToSwagger\DtoToSwaggerServiceProvider"
 ```
+
+## Use
+1. Update the config/swagger.php file according to your needs.
+2. Check ot fix your Controller/Action to string types and DTO
+3. Run the following command to automatically generate the Swagger documentation:
+```
+$ php artisan swagger:generate
+```
+This command will generate a swagger.yaml file with the Swagger documentation.
+
+## Example
+
+See example folder

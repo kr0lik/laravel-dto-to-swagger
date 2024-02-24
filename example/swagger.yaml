@@ -1,0 +1,289 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Laravel
+servers:
+  -
+    description: dev
+    url: 'http://locahost'
+paths:
+  '/api/post-route/{multipleVar}/{arrayOptionalVar}':
+    post:
+      tags:
+        - tagFromAttribute
+        - Text
+      parameters:
+        -
+          name: multipleVar
+          in: path
+          required: true
+          schema:
+            nullable: true
+            oneOf:
+              -
+                type: string
+                nullable: true
+              -
+                type: integer
+                nullable: true
+        -
+          name: arrayOptionalVar
+          in: path
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+        -
+          name: int
+          in: query
+          schema:
+            type: integer
+        -
+          name: float
+          in: header
+          schema:
+            type: number
+            format: float
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonRequest'
+          multipart/form-data:
+            schema:
+              properties:
+                uploadedFile:
+                  type: string
+                  format: binary
+              type: object
+      responses:
+        '400':
+          description: 'Validation error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '300':
+          description: response-from-attribute
+        '422':
+          description: Unprocessable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Unexpected error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/JsonResponse' }
+                  - { properties: { success: { default: true }, message: { default: success }, errors: { default: null }, data: { $ref: '#/components/schemas/JsonResponse' } } }
+      security:
+        -
+          bearerAuth: []
+  '/api/get-route/{id}':
+    get:
+      tags:
+        - Text
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        -
+          name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+        -
+          name: perPage
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '422':
+          description: Unprocessable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 'Unexpected error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: '#/components/schemas/JsonResponse' }
+                  - { properties: { success: { default: true }, message: { default: success }, errors: { default: null }, data: { $ref: '#/components/schemas/JsonResponse' } } }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: api_token
+  schemas:
+    JsonResponse:
+      required:
+        - int
+        - string
+        - float
+      properties:
+        int:
+          description: 'Some Description'
+          type: integer
+        string:
+          description: 'some description'
+          type: string
+          example:
+            - string
+            - string2
+        float:
+          type: number
+          format: float
+      type: object
+    ValidationErrorResponse:
+      allOf:
+        -
+          $ref: '#/components/schemas/JsonResponse'
+        -
+          properties:
+            success:
+              default: false
+            message:
+              default: 'Validation Error.'
+            data:
+              default: null
+            errors:
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+              example:
+                field1:
+                  - 'is required'
+                field2:
+                  - 'is required'
+              nullable: false
+    ErrorResponse:
+      allOf:
+        -
+          $ref: '#/components/schemas/JsonResponse'
+        -
+          properties:
+            success:
+              default: false
+            message:
+              default: Unprocessable.
+            data:
+              default: null
+            errors:
+              type: array
+              items:
+                type: string
+              example:
+                - 'Some error'
+    Sub:
+      required:
+        - stringNullable
+        - intFloatNullable
+      properties:
+        stringNullable:
+          description: 'Some Description'
+          type: string
+          nullable: true
+        intFloatNullable:
+          nullable: true
+          oneOf:
+            -
+              type: integer
+              nullable: true
+            -
+              type: number
+              format: float
+              nullable: true
+        objectNullableOptional:
+          type: object
+          nullable: true
+      type: object
+    JsonRequest:
+      required:
+        - int
+        - string
+        - float
+        - dateTime
+        - arrayOfString
+        - arrayOfObject
+        - arrayWithSubArrayOfInt
+        - subDto
+        - arrayOfDto
+        - objectNullable
+        - enum
+        - collectionOfString
+      properties:
+        int:
+          description: 'Some Description1'
+          type: integer
+        string:
+          description: 'some description'
+          type: string
+          example:
+            - string
+            - string2
+        float:
+          type: number
+          format: float
+        dateTime:
+          type: string
+          format: date-time
+        arrayOfString:
+          type: array
+          items:
+            type: string
+        arrayOfObject:
+          description: 'Some Description2'
+          type: array
+          items:
+            type: object
+        arrayWithSubArrayOfInt:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer
+        subDto:
+          $ref: '#/components/schemas/Sub'
+        arrayOfDto:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sub'
+        objectNullable:
+          type: object
+        enum:
+          type: string
+          enum:
+            - a
+            - b
+            - c
+        collectionOfString:
+          type: array
+          items:
+            type: string
+      type: object
