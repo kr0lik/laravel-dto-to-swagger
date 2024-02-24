@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
+use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use OpenApi\Annotations\Operation;
@@ -21,6 +22,8 @@ class TagDescriber implements OperationDescriberInterface
 
     /**
      * @param array<string, mixed> $context
+     *
+     * @throws InvalidArgumentException
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
     {
@@ -44,6 +47,9 @@ class TagDescriber implements OperationDescriberInterface
         $this->addTagFromActionFolder($operation, $reflectionMethod);
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private function addTagFromControllerName(Operation $operation, ReflectionMethod $reflectionMethod): void
     {
         if (!$this->tagFromControllerName) {
@@ -59,6 +65,9 @@ class TagDescriber implements OperationDescriberInterface
         Util::merge($operation, ['tags' => [$name]]);
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private function addTagFromActionFolder(Operation $operation, ReflectionMethod $reflectionMethod): void
     {
         if (!$this->tagFromActionFolder) {

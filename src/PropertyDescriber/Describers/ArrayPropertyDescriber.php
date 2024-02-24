@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kr0lik\DtoToSwagger\PropertyDescriber\Describers;
 
+use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriberInterface;
@@ -17,7 +18,12 @@ class ArrayPropertyDescriber implements PropertyDescriberInterface
         private PropertyDescriber $propertyDescriber,
     ) {}
 
-    public function describe(Schema $property, Type ...$types): void
+    /**
+     * @param array<string, mixed> $context
+     *
+     * @throws InvalidArgumentException
+     */
+    public function describe(Schema $property, array $context = [], Type ...$types): void
     {
         $property->type = 'array';
 
@@ -30,7 +36,7 @@ class ArrayPropertyDescriber implements PropertyDescriberInterface
             return;
         }
 
-        $this->propertyDescriber->describe($property, $type);
+        $this->propertyDescriber->describe($property, $context, $type);
     }
 
     public function supports(Type ...$types): bool

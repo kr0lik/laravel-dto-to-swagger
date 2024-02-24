@@ -217,10 +217,6 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
         ;
 
         $this->app->when(ResponseDescriber::class)
-            ->needs('$wrapSuccessResponsesToSchema')
-            ->give(config('swagger.wrapSuccessResponsesToSchema', []))
-        ;
-        $this->app->when(ResponseDescriber::class)
             ->needs('$defaultErrorResponseSchemas')
             ->give(config('swagger.defaultErrorResponseSchemas', []))
         ;

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
+use InvalidArgumentException;
+use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
@@ -24,6 +26,8 @@ class PathParameterDescriber implements OperationDescriberInterface
 
     /**
      * @param array<string, mixed> $context
+     *
+     * @throws InvalidArgumentException
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
     {
@@ -43,7 +47,9 @@ class PathParameterDescriber implements OperationDescriberInterface
 
             $schema = new Schema([]);
 
-            $this->propertyDescriber->describe($schema, ...$types);
+            $context = ContextHelper::getContext($reflectionMethod);
+
+            $this->propertyDescriber->describe($schema, $context, ...$types);
 
             $parameter = Util::getOperationParameter($operation, $name, 'path');
 

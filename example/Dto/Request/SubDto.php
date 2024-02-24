@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Example\Dto\Request;
+namespace App\Dto\Request;
 
 final readonly class SubDto
 {

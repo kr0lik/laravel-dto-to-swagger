@@ -22,9 +22,11 @@ class EnumPropertyDescriber implements PropertyDescriberInterface
     ) {}
 
     /**
+     * @param array<string, mixed> $context
+     *
      * @throws ReflectionException
      */
-    public function describe(Schema $property, Type ...$types): void
+    public function describe(Schema $property, array $context = [], Type ...$types): void
     {
         $class = $types[0]->getClassName();
 
@@ -34,7 +36,7 @@ class EnumPropertyDescriber implements PropertyDescriberInterface
 
         $enumReflection = new ReflectionEnum($class);
 
-        $this->propertyDescriber->describe($property, ...$this->refTypePreparer->prepare($enumReflection->getBackingType()));
+        $this->propertyDescriber->describe($property, $context, ...$this->refTypePreparer->prepare($enumReflection->getBackingType()));
 
         $property->enum = array_map(static fn (ReflectionEnumUnitCase $case): mixed => $case->getValue(), $enumReflection->getCases());
     }

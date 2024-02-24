@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kr0lik\DtoToSwagger\Processor;
 
 use Illuminate\Routing\Route;
+use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\PathParameterDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\SecurityDescriber;
@@ -26,6 +27,7 @@ class RouteProcessor
     ) {}
 
     /**
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
     public function process(OpenApi $openApi, Route $route): void

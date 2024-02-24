@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
+use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Contract\QueryRequestInterface;
+use Kr0lik\DtoToSwagger\Helper\ContextHelper;
+use Kr0lik\DtoToSwagger\Helper\NameHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
@@ -13,6 +16,7 @@ use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\Parameter;
 use OpenApi\Annotations\Schema;
+use OpenApi\Generator;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -21,6 +25,8 @@ use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 
 class QueryParameterDescriber implements OperationDescriberInterface
 {
+    private const IN = 'query';
+
     public function __construct(
         private ReflectionPreparer $reflectionPreparer,
         private PropertyInfoExtractor $propertyInfoExtractor,
@@ -31,6 +37,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
     /**
      * @param array<string, mixed> $context
      *
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
@@ -38,7 +45,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
         foreach ($reflectionMethod->getAttributes() as $attribute) {
             $attributeInstance = $attribute->newInstance();
 
-            if ($attributeInstance instanceof Parameter && 'query' === $attributeInstance->in) {
+            if ($attributeInstance instanceof Parameter && self::IN === $attributeInstance->in) {
                 $newParameter = Util::getOperationParameter($operation, $attributeInstance->name, $attributeInstance->in);
                 Util::merge($newParameter, $attributeInstance);
             }
@@ -53,6 +60,9 @@ class QueryParameterDescriber implements OperationDescriberInterface
         }
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass): void
     {
         $propertyNames = $this->propertyInfoExtractor->getProperties($reflectionClass->getName());
@@ -76,7 +86,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
                 continue;
             }
 
-            $parameter = Util::getOperationParameter($operation, $propertyName, 'query');
+            $parameter = $this->getParameter($operation, $reflectionProperty);
 
             Util::merge($parameter, [
                 'required' => $this->isRequired($reflectionProperty),
@@ -87,6 +97,34 @@ class QueryParameterDescriber implements OperationDescriberInterface
                 $parameter->deprecated = true;
             }
         }
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function getParameter(Operation $operation, ReflectionProperty $reflectionProperty): Parameter
+    {
+        foreach ($reflectionProperty->getAttributes() as $attribute) {
+            $attributeInstance = $attribute->newInstance();
+
+            if ($attributeInstance instanceof Parameter) {
+                $name = $attributeInstance->name;
+
+                if (Generator::UNDEFINED === $name || null === $name || '' === $name) {
+                    $name = NameHelper::getName($reflectionProperty);
+                }
+
+                $in = $attributeInstance->in;
+
+                if (Generator::UNDEFINED === $in || null === $in || '' === $in) {
+                    $in = self::IN;
+                }
+
+                return Util::getOperationParameter($operation, $name, $in);
+            }
+        }
+
+        return Util::getOperationParameter($operation, NameHelper::getName($reflectionProperty), self::IN);
     }
 
     private function getSchema(ReflectionProperty $reflectionProperty): Schema
@@ -106,7 +144,9 @@ class QueryParameterDescriber implements OperationDescriberInterface
             $reflectionProperty->getName()
         );
 
-        $this->propertyDescriber->describe($schema, ...$types);
+        $context = ContextHelper::getContext($reflectionProperty);
+
+        $this->propertyDescriber->describe($schema, $context, ...$types);
 
         return $schema;
     }

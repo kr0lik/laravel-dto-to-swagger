@@ -19,18 +19,20 @@ class CompoundPropertyDescriber implements PropertyDescriberInterface
     ) {}
 
     /**
+     * @param array<string, mixed> $context
+     *
      * @throws InvalidArgumentException
      */
-    public function describe(Schema $property, Type ...$types): void
+    public function describe(Schema $property, array $context = [], Type ...$types): void
     {
         $property->oneOf = Generator::UNDEFINED !== $property->oneOf ? $property->oneOf : [];
 
         foreach ($types as $type) {
             /** @var Schema $schema */
-            $schema = Util::createChild($property, Schema::class, []);
+            $schema = Util::createChild($property, Schema::class);
             $property->oneOf[] = $schema;
 
-            $this->propertyDescriber->describe($schema, $type);
+            $this->propertyDescriber->describe($schema, $context, $type);
         }
     }
 

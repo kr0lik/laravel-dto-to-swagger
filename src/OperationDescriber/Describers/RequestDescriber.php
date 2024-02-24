@@ -6,6 +6,8 @@ namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
 use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Contract\JsonRequestInterface;
+use Kr0lik\DtoToSwagger\Helper\ContextHelper;
+use Kr0lik\DtoToSwagger\Helper\NameHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
@@ -14,6 +16,7 @@ use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\RequestBody;
 use OpenApi\Annotations\Schema;
 use OpenApi\Attributes\Parameter;
+use OpenApi\Generator;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -52,7 +55,9 @@ class RequestDescriber implements OperationDescriberInterface
             if (1 === count($types) && is_subclass_of($types[0]->getClassName(), JsonRequestInterface::class)) {
                 $jsonContent = new Schema([]);
 
-                $this->propertyDescriber->describe($jsonContent, ...$types);
+                $context = ContextHelper::getContext($reflectionMethod);
+
+                $this->propertyDescriber->describe($jsonContent, $context, ...$types);
 
                 $request = Util::getChild($operation, RequestBody::class);
 
@@ -68,16 +73,17 @@ class RequestDescriber implements OperationDescriberInterface
                     Util::merge($operation, ['responses' => $this->requestErrorResponseSchemas]);
                 }
 
-                $this->searchParameters($operation, $types[0]);
-                $this->searchFIleUploadType($operation, $types[0]);
+                $this->searchAndDescribeParameters($operation, $types[0]);
+                $this->searchAndDescribeFIleUploadType($operation, $types[0]);
             }
         }
     }
 
     /**
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    private function searchParameters(Operation $operation, Type $type): void
+    private function searchAndDescribeParameters(Operation $operation, Type $type): void
     {
         $class = $type->getClassName();
 
@@ -92,48 +98,33 @@ class RequestDescriber implements OperationDescriberInterface
                 $attributeInstance = $reflectionAttribute->newInstance();
 
                 if ($attributeInstance instanceof Parameter) {
-                    $newParameter = Util::getOperationParameter($operation, $reflectionProperty->getName(), $attributeInstance->in);
+                    $name = $attributeInstance->name;
+
+                    if (Generator::UNDEFINED === $name || null === $name || '' === $name) {
+                        $name = NameHelper::getName($reflectionProperty);
+                    }
+
+                    $newParameter = Util::getOperationParameter($operation, $name, $attributeInstance->in);
                     Util::merge($newParameter, $attributeInstance);
 
                     /** @var Schema $schema */
                     $schema = Util::getChild($newParameter, Schema::class);
 
-                    $this->propertyDescriber->describe($schema, ...$this->reflectionPreparer->getTypes($reflectionProperty));
+                    $context = ContextHelper::getContext($reflectionProperty);
+
+                    $this->propertyDescriber->describe($schema, $context, ...$this->reflectionPreparer->getTypes($reflectionProperty));
                 }
             }
         }
     }
 
     /**
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    private function searchFIleUploadType(Operation $operation, Type $type): void
+    private function searchAndDescribeFIleUploadType(Operation $operation, Type $type): void
     {
-        if (null === $this->fileUploadType || '' === $this->fileUploadType) {
-            return;
-        }
-
-        $class = $type->getClassName();
-
-        if (null === $class) {
-            return;
-        }
-
-        $reflectionClass = new ReflectionClass($class);
-
-        $fileUploadProperties = [];
-
-        foreach ($reflectionClass->getProperties() as $reflectionProperty) {
-            if (
-                $reflectionProperty->getType() instanceof ReflectionNamedType
-                && (
-                    $reflectionProperty->getType()->getName() === $this->fileUploadType
-                    || is_subclass_of($reflectionProperty->getType()->getName(), $this->fileUploadType)
-                )
-            ) {
-                $fileUploadProperties[] = $reflectionProperty->getName();
-            }
-        }
+        $fileUploadProperties = $this->searchFIleUploadProperties($type);
 
         if ([] === $fileUploadProperties) {
             return;
@@ -153,5 +144,41 @@ class RequestDescriber implements OperationDescriberInterface
                 ],
             ],
         ]);
+    }
+
+    /**
+     * @throws ReflectionException
+     *
+     * @return string[]
+     */
+    private function searchFIleUploadProperties(Type $type): array
+    {
+        if (null === $this->fileUploadType || '' === $this->fileUploadType) {
+            return [];
+        }
+
+        $class = $type->getClassName();
+
+        if (null === $class) {
+            return [];
+        }
+
+        $reflectionClass = new ReflectionClass($class);
+
+        $fileUploadProperties = [];
+
+        foreach ($reflectionClass->getProperties() as $reflectionProperty) {
+            if (
+                $reflectionProperty->getType() instanceof ReflectionNamedType
+                && (
+                    $reflectionProperty->getType()->getName() === $this->fileUploadType
+                    || is_subclass_of($reflectionProperty->getType()->getName(), $this->fileUploadType)
+                )
+            ) {
+                $fileUploadProperties[] = NameHelper::getName($reflectionProperty);
+            }
+        }
+
+        return $fileUploadProperties;
     }
 }

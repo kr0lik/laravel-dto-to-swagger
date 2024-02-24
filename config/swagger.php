@@ -12,15 +12,6 @@ return [
     'middlewaresToAuth' => ['auth:sanctum' => ['bearerAuth' => []]], // array<string, array<string, array<mixed>>>
     'tagFromControllerName' => true, // bool
     'tagFromActionFolder' => true, // bool
-    'wrapSuccessResponsesToSchema' => [
-        'ref' => '#/components/schemas/JsonResponse',
-        'to' => 'data',
-        'properties' => [
-            'success' => ['default' => true],
-            'message' => ['default' => 'success'],
-            'errors' => ['default' => null],
-        ]
-    ], // array<string, mixed>
     'fileUploadType' => SymfonyUploadedFile::class,
     'defaultErrorResponseSchemas' => [
         Response::HTTP_UNPROCESSABLE_ENTITY => [

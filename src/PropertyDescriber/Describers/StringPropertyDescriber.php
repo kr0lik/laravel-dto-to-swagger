@@ -10,7 +10,10 @@ use Symfony\Component\PropertyInfo\Type;
 
 class StringPropertyDescriber implements PropertyDescriberInterface
 {
-    public function describe(Schema $property, Type ...$types): void
+    /**
+     * @param array<string, mixed> $context
+     */
+    public function describe(Schema $property, array $context = [], Type ...$types): void
     {
         $property->type = 'string';
     }

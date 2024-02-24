@@ -7,6 +7,8 @@ namespace Kr0lik\DtoToSwagger\PropertyDescriber\Describers;
 use BackedEnum;
 use DateTimeInterface;
 use Hoa\Zformat\Parameter;
+use Kr0lik\DtoToSwagger\Helper\ContextHelper;
+use Kr0lik\DtoToSwagger\Helper\NameHelper;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriberInterface;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\PhpDocReader;
@@ -32,9 +34,11 @@ class ObjectPropertyDescriber implements PropertyDescriberInterface
     ) {}
 
     /**
+     * @param array<string, mixed> $context
+     *
      * @throws ReflectionException
      */
-    public function describe(Schema $property, Type ...$types): void
+    public function describe(Schema $property, array $context = [], Type ...$types): void
     {
         $class = $types[0]->getClassName();
 
@@ -149,7 +153,7 @@ class ObjectPropertyDescriber implements PropertyDescriberInterface
                     $schema->required = [];
                 }
 
-                $schema->required[] = $propertyName;
+                $schema->required[] = NameHelper::getName($reflectionProperty);
             }
         }
     }
@@ -170,7 +174,7 @@ class ObjectPropertyDescriber implements PropertyDescriberInterface
             }
         }
 
-        $propertySchema->property = $reflectionProperty->getName();
+        $propertySchema->property = NameHelper::getName($reflectionProperty);
 
         if ($this->phpDocReader->isDeprecated($reflectionProperty)) {
             $propertySchema->deprecated = true;
@@ -181,7 +185,9 @@ class ObjectPropertyDescriber implements PropertyDescriberInterface
             $reflectionProperty->getName()
         );
 
-        $this->propertyDescriber->describe($propertySchema, ...$types);
+        $context = ContextHelper::getContext($reflectionProperty);
+
+        $this->propertyDescriber->describe($propertySchema, $context, ...$types);
 
         return $propertySchema;
     }

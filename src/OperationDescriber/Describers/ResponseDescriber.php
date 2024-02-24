@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
+use InvalidArgumentException;
+use Kr0lik\DtoToSwagger\Attribute\Wrap;
 use Kr0lik\DtoToSwagger\Contract\JsonResponseInterface;
+use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
@@ -12,7 +15,6 @@ use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
 use OpenApi\Annotations\JsonContent;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\Response;
-use OpenApi\Annotations\Schema;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -22,19 +24,18 @@ use Symfony\Component\PropertyInfo\Type;
 class ResponseDescriber implements OperationDescriberInterface
 {
     /**
-     * @param array<string, mixed>             $wrapSuccessResponsesToSchema
      * @param array<int, array<string, mixed>> $defaultErrorResponseSchemas
      */
     public function __construct(
         private PropertyDescriber $propertyDescriber,
         private ReflectionPreparer $reflectionPreparer,
-        private array $wrapSuccessResponsesToSchema,
         private array $defaultErrorResponseSchemas,
     ) {}
 
     /**
      * @param array<string, mixed> $context
      *
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
@@ -59,7 +60,9 @@ class ResponseDescriber implements OperationDescriberInterface
 
         foreach ($returnTypes as $returnType) {
             if (is_subclass_of($returnType->getClassName(), JsonResponseInterface::class)) {
-                $this->addResponseFromObject($operation, $returnType);
+                $context = ContextHelper::getContext($reflectionMethod);
+
+                $this->addResponseFromObject($operation, $returnType, $context);
 
                 continue;
             }
@@ -80,14 +83,30 @@ class ResponseDescriber implements OperationDescriberInterface
         }
     }
 
-    private function addResponseFromObject(Operation $operation, Type $returnType): void
+    /**
+     * @param array<string, mixed> $context
+     *
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     */
+    private function addResponseFromObject(Operation $operation, Type $returnType, array $context): void
     {
+        assert(is_string($returnType->getClassName()));
+
+        $reflectionClass = new ReflectionClass($returnType->getClassName());
+
         $jsonContent = new JsonContent([]);
 
-        if ([] !== $this->wrapSuccessResponsesToSchema) {
-            $this->wrapResponse($jsonContent, $returnType);
-        } else {
-            $this->propertyDescriber->describe($jsonContent, $returnType);
+        $this->propertyDescriber->describe($jsonContent, $context, $returnType);
+
+        foreach ($reflectionClass->getAttributes() as $attribute) {
+            $attributeInstance = $attribute->newInstance();
+
+            if ($attributeInstance instanceof Wrap) {
+                $this->wrapResponse($jsonContent, $attributeInstance);
+
+                break;
+            }
         }
 
         $response = Util::getCollectionItem($operation, Response::class, [
@@ -103,23 +122,17 @@ class ResponseDescriber implements OperationDescriberInterface
         ], true);
     }
 
-    private function wrapResponse(JsonContent $jsonContent, Type $returnType): void
+    private function wrapResponse(JsonContent &$jsonContent, Wrap $wrap): void
     {
-        $properties = $this->wrapSuccessResponsesToSchema['properties'];
+        $properties = $wrap->properties;
 
-        $to = $this->wrapSuccessResponsesToSchema['to'];
+        $properties[$wrap->to] = $jsonContent;
 
-        $newSchema = new Schema([]);
-
-        $this->propertyDescriber->describe($newSchema, $returnType);
-
-        $properties[$to] = $newSchema;
-
-        Util::merge($jsonContent, [
+        $jsonContent = new JsonContent([
             'allOf' => [
-                ['$ref' => $this->wrapSuccessResponsesToSchema['ref']],
+                ['$ref' => $wrap->ref],
                 ['properties' => $properties],
             ],
-        ], true);
+        ]);
     }
 }

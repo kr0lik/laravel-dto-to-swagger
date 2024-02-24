@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Example\Dto;
+namespace App\Dto;
 
 use OpenApi\Attributes\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;

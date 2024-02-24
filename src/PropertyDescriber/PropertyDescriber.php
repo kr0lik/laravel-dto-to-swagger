@@ -19,10 +19,13 @@ final class PropertyDescriber
         $this->propertyDescribers[] = $propertyDescriber;
     }
 
-    public function describe(Schema $property, Type ...$types): void
+    /**
+     * @param array<string, mixed> $context
+     */
+    public function describe(Schema $property, array $context = [], Type ...$types): void
     {
         foreach ($this->getPropertyDescriber(...$types) as $propertyDescriber) {
-            $propertyDescriber->describe($property, ...$types);
+            $propertyDescriber->describe($property, $context, ...$types);
         }
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
+use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Attribute\Security;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
@@ -16,6 +17,8 @@ class SecurityDescriber implements OperationDescriberInterface
 
     /**
      * @param array<string, mixed> $context
+     *
+     * @throws InvalidArgumentException
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
     {

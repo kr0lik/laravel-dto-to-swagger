@@ -6,6 +6,7 @@ namespace Kr0lik\DtoToSwagger\Processor;
 
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Route as LaravelRoute;
+use InvalidArgumentException;
 use OpenApi\Annotations\OpenApi;
 use ReflectionException;
 use RuntimeException;
@@ -23,6 +24,7 @@ class RoutingProcessor
     ) {}
 
     /**
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      * @throws RuntimeException
      */

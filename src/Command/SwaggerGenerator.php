@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kr0lik\DtoToSwagger\Command;
 
 use Illuminate\Console\Command;
+use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Processor\RoutingProcessor;
 use Kr0lik\DtoToSwagger\Register\SchemaRegister;
 use OpenApi\Annotations\OpenApi;
@@ -29,6 +30,7 @@ class SwaggerGenerator extends Command
     }
 
     /**
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      * @throws RuntimeException
      */

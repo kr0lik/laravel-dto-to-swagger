@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Example\Http\Controllers;
 
-use Example\Dto\Request\JsonRequestDto;
-use Example\Dto\Request\QueryRequest;
-use Example\Dto\Response\JsonResponseDto;
+use App\Dto\Request\HeadRequestDto;
+use App\Dto\Request\QueryRequest;
+use App\Dto\Request\RequestDto;
+use App\Dto\Response\ResponseDto;
 use Illuminate\Routing\Controller;
 use Kr0lik\ParamConverter\Annotation\ParamConverter;
 use OpenApi\Attributes\Response;
@@ -19,18 +20,18 @@ class TextController extends Controller
      * @param string[] $arrayOptionalVar
      */
     #[Route(['post'], 'post-route/{multipleVar}/{arrayOptionalVar}', middleware: ['api', 'auth:sanctum'])]
-    #[ParamConverter('requestDto', JsonRequestDto::class, options: ['source' => 'all'])]
+    #[ParamConverter('requestDto', RequestDto::class, options: ['source' => 'all'])]
     #[Tag('tagFromAttribute')]
     #[Response(response: 300, description: 'response-from-attribute')]
-    public function postAction(JsonRequestDto $requestDto, int|string|null $multipleVar, ?array $arrayOptionalVar = []): JsonResponseDto
+    public function postAction(RequestDto $requestDto, int|string|null $multipleVar, ?array $arrayOptionalVar = []): ResponseDto
     {
-        return new JsonResponseDto(1, 'string', 1.1);
+        return new ResponseDto(1, 'string', 1.1);
     }
 
     #[Route(['get'], 'get-route/{id}', middleware: ['api'])]
     #[ParamConverter('queryRequest', QueryRequest::class, options: ['source' => 'query'])]
-    public function getAction(QueryRequest $queryRequest, int $id): JsonResponseDto
+    public function getAction(QueryRequest $queryRequest, HeadRequestDto $headers, int $id): ResponseDto
     {
-        return new JsonResponseDto(1, 'string', 1.1);
+        return new ResponseDto(1, 'string', 1.1);
     }
 }
