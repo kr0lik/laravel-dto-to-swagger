@@ -27,13 +27,7 @@ class TagDescriber implements OperationDescriberInterface
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
     {
-        foreach ($reflectionMethod->getAttributes() as $attribute) {
-            $instance = $attribute->newInstance();
-
-            if ($instance instanceof Tag) {
-                Util::merge($operation, ['tags' => [$instance->name]]);
-            }
-        }
+        $this->addFromAttributes($operation, $reflectionMethod);
 
         if (
             array_key_exists(self::DEFAULT_TAGS_CONTEXT, $context)
@@ -45,6 +39,20 @@ class TagDescriber implements OperationDescriberInterface
 
         $this->addTagFromControllerName($operation, $reflectionMethod);
         $this->addTagFromActionFolder($operation, $reflectionMethod);
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function addFromAttributes(Operation $operation, ReflectionMethod $reflectionMethod): void
+    {
+        foreach ($reflectionMethod->getAttributes() as $attribute) {
+            $instance = $attribute->newInstance();
+
+            if ($instance instanceof Tag) {
+                Util::merge($operation, ['tags' => [$instance->name]]);
+            }
+        }
     }
 
     /**

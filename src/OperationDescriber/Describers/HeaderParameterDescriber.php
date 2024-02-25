@@ -42,20 +42,28 @@ class HeaderParameterDescriber implements OperationDescriberInterface
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
     {
-        foreach ($reflectionMethod->getAttributes() as $attribute) {
-            $attributeInstance = $attribute->newInstance();
-
-            if ($attributeInstance instanceof Parameter && self::IN === $attributeInstance->in) {
-                $newParameter = Util::getOperationParameter($operation, $attributeInstance->name, $attributeInstance->in);
-                Util::merge($newParameter, $attributeInstance);
-            }
-        }
+        $this->addFromAttributes($operation, $reflectionMethod);
 
         foreach ($this->reflectionPreparer->getArgumentTypes($reflectionMethod) as $types) {
             if (1 === count($types) && is_subclass_of($types[0]->getClassName(), HeaderRequestInterface::class)) {
                 $reflectionClass = new ReflectionClass($types[0]->getClassName());
 
                 $this->addHeaderParametersFromObject($operation, $reflectionClass);
+            }
+        }
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function addFromAttributes(Operation $operation, ReflectionMethod $reflectionMethod): void
+    {
+        foreach ($reflectionMethod->getAttributes() as $attribute) {
+            $attributeInstance = $attribute->newInstance();
+
+            if ($attributeInstance instanceof Parameter && self::IN === $attributeInstance->in) {
+                $newParameter = Util::getOperationParameter($operation, $attributeInstance->name, $attributeInstance->in);
+                Util::merge($newParameter, $attributeInstance);
             }
         }
     }

@@ -43,21 +43,13 @@ class RequestDescriber implements OperationDescriberInterface
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
     {
-        foreach ($reflectionMethod->getAttributes() as $attribute) {
-            $attributeInstance = $attribute->newInstance();
-
-            if ($attributeInstance instanceof RequestBody) {
-                Util::createChild($operation, RequestBody::class, (array) $attributeInstance->jsonSerialize());
-            }
-        }
+        $this->addFromAttributes($operation, $reflectionMethod);
 
         foreach ($this->reflectionPreparer->getArgumentTypes($reflectionMethod) as $types) {
             if (1 === count($types) && is_subclass_of($types[0]->getClassName(), JsonRequestInterface::class)) {
                 $jsonContent = new Schema([]);
 
-                $context = ContextHelper::getContext($reflectionMethod);
-
-                $this->propertyDescriber->describe($jsonContent, $context, ...$types);
+                $this->propertyDescriber->describe($jsonContent, [], ...$types);
 
                 $request = Util::getChild($operation, RequestBody::class);
 
@@ -75,6 +67,20 @@ class RequestDescriber implements OperationDescriberInterface
 
                 $this->searchAndDescribeParameters($operation, $types[0]);
                 $this->searchAndDescribeFIleUploadType($operation, $types[0]);
+            }
+        }
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function addFromAttributes(Operation $operation, ReflectionMethod $reflectionMethod): void
+    {
+        foreach ($reflectionMethod->getAttributes() as $attribute) {
+            $attributeInstance = $attribute->newInstance();
+
+            if ($attributeInstance instanceof RequestBody) {
+                Util::createChild($operation, RequestBody::class, (array) $attributeInstance->jsonSerialize());
             }
         }
     }
@@ -132,7 +138,7 @@ class RequestDescriber implements OperationDescriberInterface
 
         $uploadContent = new Schema([
             'type' => 'object',
-            'properties' => array_map(static fn (): array => ['type' => 'string', 'format' => 'binary'], array_flip($fileUploadProperties)),
+            'properties' => $fileUploadProperties,
         ]);
 
         $request = Util::getChild($operation, RequestBody::class);
@@ -149,7 +155,7 @@ class RequestDescriber implements OperationDescriberInterface
     /**
      * @throws ReflectionException
      *
-     * @return string[]
+     * @return array<string, array<string, mixed>>
      */
     private function searchFIleUploadProperties(Type $type): array
     {
@@ -175,7 +181,11 @@ class RequestDescriber implements OperationDescriberInterface
                     || is_subclass_of($reflectionProperty->getType()->getName(), $this->fileUploadType)
                 )
             ) {
-                $fileUploadProperties[] = NameHelper::getName($reflectionProperty);
+                $name = NameHelper::getName($reflectionProperty);
+
+                $context = ContextHelper::getContext($reflectionProperty);
+
+                $fileUploadProperties[$name] = array_merge($context, ['type' => 'string', 'format' => 'binary']);
             }
         }
 

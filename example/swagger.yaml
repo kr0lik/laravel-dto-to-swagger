@@ -27,6 +27,14 @@ paths:
                 type: integer
                 nullable: true
         -
+          name: arrayOptionalVar
+          in: path
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+        -
           name: int
           in: query
           schema:
@@ -81,17 +89,18 @@ paths:
       security:
         -
           bearerAuth: []
-  '/api/get-route/{id}':
+  '/api/get-route/{uuid}':
     get:
       tags:
         - Text
       parameters:
         -
-          name: id
+          name: uuid
           in: path
           required: true
           schema:
-            type: integer
+            type: string
+            pattern: '[0-7][0-9A-HJKMNP-TV-Z]{25}'
         -
           name: page
           in: query
@@ -295,6 +304,5 @@ components:
             - string2
         dateTime:
           type: string
-          format: date-time
-          pattern: 'Y-m-d H:i:s'
+          format: date
       type: object

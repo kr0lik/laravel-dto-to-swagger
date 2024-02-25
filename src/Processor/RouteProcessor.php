@@ -6,6 +6,7 @@ namespace Kr0lik\DtoToSwagger\Processor;
 
 use Illuminate\Routing\Route;
 use InvalidArgumentException;
+use Kr0lik\DtoToSwagger\Attribute\Context;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\PathParameterDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\SecurityDescriber;
@@ -40,7 +41,7 @@ class RouteProcessor
             }
 
             $context = [];
-            $context[PathParameterDescriber::IN_PATH_PARAMETERS_CONTEXT] = (array) $route->parameterNames();
+            $context[PathParameterDescriber::IN_PATH_PARAMETERS_CONTEXT] = $this->getParameters($route);
             $context[SecurityDescriber::DEFAULT_SECURITIES_CONTEXT] = $this->getSecurities($route);
 
             $operation = Util::getOperation($pathItem, $method);
@@ -67,6 +68,23 @@ class RouteProcessor
         [$class, $action] = explode('@', $route->action['uses']);
 
         return new ReflectionMethod($class, $action);
+    }
+
+    /**
+     * @return array<string, Context>
+     */
+    private function getParameters(Route $route): array
+    {
+        $parameterNames = [];
+
+        /** @var string $parameterName */
+        foreach ($route->parameterNames() as $parameterName) {
+            $pattern = $route->wheres[$parameterName] ?? null;
+
+            $parameterNames[$parameterName] = new Context(pattern: $pattern);
+        }
+
+        return $parameterNames;
     }
 
     /**

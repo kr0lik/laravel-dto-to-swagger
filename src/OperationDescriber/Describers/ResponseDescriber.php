@@ -7,7 +7,6 @@ namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Attribute\Wrap;
 use Kr0lik\DtoToSwagger\Contract\JsonResponseInterface;
-use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
@@ -40,13 +39,7 @@ class ResponseDescriber implements OperationDescriberInterface
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
     {
-        foreach ($reflectionMethod->getAttributes() as $attribute) {
-            $attributeInstance = $attribute->newInstance();
-
-            if ($attributeInstance instanceof Response) {
-                Util::createCollectionItem($operation, 'responses', Response::class, (array) $attributeInstance->jsonSerialize());
-            }
-        }
+        $this->addFromAttributes($operation, $reflectionMethod);
 
         if ([] !== $this->defaultErrorResponseSchemas) {
             Util::merge($operation, ['responses' => $this->defaultErrorResponseSchemas]);
@@ -60,9 +53,7 @@ class ResponseDescriber implements OperationDescriberInterface
 
         foreach ($returnTypes as $returnType) {
             if (is_subclass_of($returnType->getClassName(), JsonResponseInterface::class)) {
-                $context = ContextHelper::getContext($reflectionMethod);
-
-                $this->addResponseFromObject($operation, $returnType, $context);
+                $this->addResponseFromObject($operation, $returnType);
 
                 continue;
             }
@@ -84,12 +75,24 @@ class ResponseDescriber implements OperationDescriberInterface
     }
 
     /**
-     * @param array<string, mixed> $context
-     *
+     * @throws InvalidArgumentException
+     */
+    private function addFromAttributes(Operation $operation, ReflectionMethod $reflectionMethod): void
+    {
+        foreach ($reflectionMethod->getAttributes() as $attribute) {
+            $attributeInstance = $attribute->newInstance();
+
+            if ($attributeInstance instanceof Response) {
+                Util::createCollectionItem($operation, 'responses', Response::class, (array) $attributeInstance->jsonSerialize());
+            }
+        }
+    }
+
+    /**
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    private function addResponseFromObject(Operation $operation, Type $returnType, array $context): void
+    private function addResponseFromObject(Operation $operation, Type $returnType): void
     {
         assert(is_string($returnType->getClassName()));
 
@@ -97,7 +100,7 @@ class ResponseDescriber implements OperationDescriberInterface
 
         $jsonContent = new JsonContent([]);
 
-        $this->propertyDescriber->describe($jsonContent, $context, $returnType);
+        $this->propertyDescriber->describe($jsonContent, [], $returnType);
 
         foreach ($reflectionClass->getAttributes() as $attribute) {
             $attributeInstance = $attribute->newInstance();

@@ -33,7 +33,7 @@ final class RequestDto implements JsonRequestInterface
         #[Parameter(name: 'X-FLOAT', in: 'header')]
         readonly float $float,
         #[Name('datetime')]
-        #[Context(['dateTimePattern' => 'Y-m-d H:i:s'])]
+        #[Context(pattern: 'Y-m-d H:i:s')]
         readonly DateTimeImmutable $dateTimeImmutable,
         readonly array $arrayOfString,
         /** Some Description2 */

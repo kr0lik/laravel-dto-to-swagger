@@ -22,6 +22,8 @@ class SecurityDescriber implements OperationDescriberInterface
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
     {
+        $this->addFromAttributes($operation, $reflectionMethod);
+
         if (
             array_key_exists(self::DEFAULT_SECURITIES_CONTEXT, $context)
             && is_array($context[self::DEFAULT_SECURITIES_CONTEXT])
@@ -29,7 +31,13 @@ class SecurityDescriber implements OperationDescriberInterface
         ) {
             Util::merge($operation, ['security' => $context[self::DEFAULT_SECURITIES_CONTEXT]]);
         }
+    }
 
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function addFromAttributes(Operation $operation, ReflectionMethod $reflectionMethod): void
+    {
         foreach ($reflectionMethod->getAttributes() as $attribute) {
             $instance = $attribute->newInstance();
 

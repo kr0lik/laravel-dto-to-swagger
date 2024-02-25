@@ -5,30 +5,25 @@ declare(strict_types=1);
 namespace Kr0lik\DtoToSwagger\PropertyDescriber\Describers;
 
 use DateTimeInterface;
+use InvalidArgumentException;
+use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriberInterface;
 use OpenApi\Annotations\Schema;
 use Symfony\Component\PropertyInfo\Type;
 
 class DateTimePropertyDescriber implements PropertyDescriberInterface
 {
-    public const CONTEXT_DATETIME_FORMAT = 'dateTimeFormat';
-    public const CONTEXT_DATETIME_PATTERN = 'dateTimePattern';
-
     /**
      * @param array<string, mixed> $context
+     *
+     * @throws InvalidArgumentException
      */
     public function describe(Schema $property, array $context = [], Type ...$types): void
     {
         $property->type = 'string';
         $property->format = 'date-time';
 
-        if (array_key_exists(self::CONTEXT_DATETIME_FORMAT, $context)) {
-            $property->format = $context[self::CONTEXT_DATETIME_FORMAT];
-        }
-
-        if (array_key_exists(self::CONTEXT_DATETIME_PATTERN, $context)) {
-            $property->pattern = $context[self::CONTEXT_DATETIME_PATTERN];
-        }
+        Util::merge($property, $context, true);
     }
 
     public function supports(Type ...$types): bool

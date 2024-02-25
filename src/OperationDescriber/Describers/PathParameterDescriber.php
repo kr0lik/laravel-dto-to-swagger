@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
 use InvalidArgumentException;
-use Kr0lik\DtoToSwagger\Helper\ContextHelper;
+use Kr0lik\DtoToSwagger\Attribute\Context;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
@@ -31,25 +31,19 @@ class PathParameterDescriber implements OperationDescriberInterface
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
     {
-        foreach ($reflectionMethod->getAttributes() as $attribute) {
-            $attributeInstance = $attribute->newInstance();
-
-            if ($attributeInstance instanceof Parameter && 'path' === $attributeInstance->in) {
-                $newParameter = Util::getOperationParameter($operation, $attributeInstance->name, $attributeInstance->in);
-                Util::merge($newParameter, $attributeInstance);
-            }
-        }
+        $this->addFromAttributes($operation, $reflectionMethod);
 
         foreach ($this->reflectionPreparer->getArgumentTypes($reflectionMethod) as $name => $types) {
-            if (!in_array($name, $context[self::IN_PATH_PARAMETERS_CONTEXT] ?? [], true)) {
+            if (!array_key_exists($name, $context[self::IN_PATH_PARAMETERS_CONTEXT] ?? [])) {
                 continue;
             }
 
             $schema = new Schema([]);
 
-            $context = ContextHelper::getContext($reflectionMethod);
+            /** @var Context $currentPropertyContext */
+            $currentPropertyContext = $context[self::IN_PATH_PARAMETERS_CONTEXT][$name];
 
-            $this->propertyDescriber->describe($schema, $context, ...$types);
+            $this->propertyDescriber->describe($schema, $currentPropertyContext->jsonSerialize(), ...$types);
 
             $parameter = Util::getOperationParameter($operation, $name, 'path');
 
@@ -57,6 +51,21 @@ class PathParameterDescriber implements OperationDescriberInterface
                 'required' => true,
                 'schema' => $schema,
             ], true);
+        }
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function addFromAttributes(Operation $operation, ReflectionMethod $reflectionMethod): void
+    {
+        foreach ($reflectionMethod->getAttributes() as $attribute) {
+            $attributeInstance = $attribute->newInstance();
+
+            if ($attributeInstance instanceof Parameter && 'path' === $attributeInstance->in) {
+                $newParameter = Util::getOperationParameter($operation, $attributeInstance->name, $attributeInstance->in);
+                Util::merge($newParameter, $attributeInstance);
+            }
         }
     }
 }

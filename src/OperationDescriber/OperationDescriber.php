@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Kr0lik\DtoToSwagger\OperationDescriber;
 
 use InvalidArgumentException;
-use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use OpenApi\Annotations\Operation;
 use ReflectionMethod;
@@ -36,8 +35,6 @@ final class OperationDescriber
                 Util::merge($operation, $instanceAttribute);
             }
         }
-
-        $context = array_merge($context, ContextHelper::getContext($reflectionMethod));
 
         foreach ($this->operationDescribers as $describer) {
             $describer->describe($operation, $reflectionMethod, $context);

@@ -5,14 +5,21 @@ declare(strict_types=1);
 namespace Kr0lik\DtoToSwagger\Attribute;
 
 use Attribute;
+use JsonSerializable;
 
-#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
-class Context
+#[Attribute(Attribute::TARGET_PROPERTY)]
+class Context implements JsonSerializable
 {
-    /**
-     * @param array<string, mixed> $context
-     */
     public function __construct(
-        readonly array $context = [],
+        readonly ?string $format = null,
+        readonly ?string $pattern = null,
     ) {}
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return array_filter(get_object_vars($this));
+    }
 }
