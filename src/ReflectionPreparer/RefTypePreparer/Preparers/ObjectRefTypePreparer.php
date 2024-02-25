@@ -8,13 +8,12 @@ use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\RefTypePreparer\RefTypePreparerInterface;
 use ReflectionNamedType;
 use ReflectionType;
+use stdClass;
 use Symfony\Component\PropertyInfo\Type;
 use Traversable;
 
 class ObjectRefTypePreparer implements RefTypePreparerInterface
 {
-    public const SOURCE_CLASS_CONTEXT = 'sourceClass';
-
     /**
      * @param array<string, mixed> $context
      *
@@ -26,7 +25,13 @@ class ObjectRefTypePreparer implements RefTypePreparerInterface
     {
         assert($reflectionType instanceof ReflectionNamedType);
 
-        $propertyInfo = new Type(Type::BUILTIN_TYPE_OBJECT, $reflectionType->allowsNull(), $reflectionType->getName());
+        $className = $reflectionType->getName();
+
+        if (Type::BUILTIN_TYPE_OBJECT === $className || stdClass::class === $className) {
+            $className = null;
+        }
+
+        $propertyInfo = new Type(Type::BUILTIN_TYPE_OBJECT, $reflectionType->allowsNull(), $className);
 
         return [$propertyInfo];
     }

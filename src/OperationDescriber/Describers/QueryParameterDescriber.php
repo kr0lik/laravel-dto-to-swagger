@@ -11,6 +11,7 @@ use Kr0lik\DtoToSwagger\Helper\NameHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
+use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\PhpDocReader;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
 use OpenApi\Annotations\Operation;
@@ -21,7 +22,6 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionProperty;
-use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 
 class QueryParameterDescriber implements OperationDescriberInterface
 {
@@ -29,7 +29,6 @@ class QueryParameterDescriber implements OperationDescriberInterface
 
     public function __construct(
         private ReflectionPreparer $reflectionPreparer,
-        private PropertyInfoExtractor $propertyInfoExtractor,
         private PropertyDescriber $propertyDescriber,
         private PhpDocReader $phpDocReader,
     ) {}
@@ -73,27 +72,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
      */
     private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass): void
     {
-        $propertyNames = $this->propertyInfoExtractor->getProperties($reflectionClass->getName());
-
-        foreach ($propertyNames as $propertyName) {
-            try {
-                $reflectionProperty = $reflectionClass->getProperty($propertyName);
-            } catch (ReflectionException) {
-                continue;
-            }
-
-            if ($reflectionProperty->isStatic()) {
-                continue;
-            }
-
-            if ($reflectionClass->getName() !== $reflectionProperty->getDeclaringClass()->getName()) {
-                continue;
-            }
-
-            if (!$this->propertyInfoExtractor->isReadable($reflectionClass->getName(), $propertyName)) {
-                continue;
-            }
-
+        foreach (ClassHelper::getVisibleProperties($reflectionClass) as $reflectionProperty) {
             $parameter = $this->getParameter($operation, $reflectionProperty);
 
             Util::merge($parameter, [
@@ -147,10 +126,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
             }
         }
 
-        $types = $this->propertyInfoExtractor->getTypes(
-            $reflectionProperty->getDeclaringClass()->getName(),
-            $reflectionProperty->getName()
-        );
+        $types = $this->reflectionPreparer->getTypes($reflectionProperty);
 
         $context = ContextHelper::getContext($reflectionProperty);
 

@@ -28,7 +28,6 @@ use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\FloatPropertyDescriber;
 use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\IntegerPropertyDescriber;
 use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\NullablePropertyDescriber;
 use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\ObjectPropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\StdClassPropertyDescriber;
 use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\StringPropertyDescriber;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriberInterface;
@@ -267,7 +266,6 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
                 ArrayPropertyDescriber::class,
                 CompoundPropertyDescriber::class,
                 ObjectPropertyDescriber::class,
-                StdClassPropertyDescriber::class,
             ];
         });
 

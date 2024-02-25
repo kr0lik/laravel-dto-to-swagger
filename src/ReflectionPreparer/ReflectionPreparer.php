@@ -8,11 +8,13 @@ use Kr0lik\DtoToSwagger\ReflectionPreparer\RefTypePreparer\RefTypePreparer;
 use ReflectionMethod;
 use ReflectionProperty;
 use ReflectionType;
+use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\PropertyInfo\Type;
 
 class ReflectionPreparer
 {
     public function __construct(
+        private PropertyInfoExtractor $propertyInfoExtractor,
         private PhpDocReader $phpDocReader,
         private RefTypePreparer $reflectionTypePreparer,
     ) {}
@@ -22,7 +24,10 @@ class ReflectionPreparer
      */
     public function getTypes(ReflectionProperty $reflectionProperty): array
     {
-        return $this->reflectionTypePreparer->prepare($reflectionProperty->getType());
+        return $this->propertyInfoExtractor->getTypes(
+            $reflectionProperty->getDeclaringClass()->getName(),
+            $reflectionProperty->getName(),
+        );
     }
 
     /**

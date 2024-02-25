@@ -10,6 +10,7 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tags\Deprecated;
 use phpDocumentor\Reflection\DocBlock\Tags\Param;
 use phpDocumentor\Reflection\DocBlock\Tags\Return_;
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionClass;
 use ReflectionMethod;
@@ -51,6 +52,38 @@ class PhpDocReader
         }
 
         return false;
+    }
+
+    /**
+     * @return Type[]
+     */
+    public function getPropertyType(ReflectionProperty $reflectionProperty): array
+    {
+        $docBlock = $this->getDockBLock($reflectionProperty);
+
+        foreach ($docBlock->getTags() as $tag) {
+            if (!$tag instanceof Var_) {
+                continue;
+            }
+
+            return $this->docTypePreparer->prepare($tag->getType(), [
+                ObjectDocTypePreparer::SOURCE_CLASS_CONTEXT => $reflectionProperty->getDeclaringClass()->getName(),
+            ]);
+        }
+
+        $constructor = $reflectionProperty->getDeclaringClass()->getConstructor();
+
+        if (null === $constructor) {
+            return [];
+        }
+
+        foreach ($this->getNamedParamTypes($constructor) as $name => $types) {
+            if ($name === $reflectionProperty->getName()) {
+                return $types;
+            }
+        }
+
+        return [];
     }
 
     /**

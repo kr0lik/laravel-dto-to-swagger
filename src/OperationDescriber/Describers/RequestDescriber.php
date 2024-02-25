@@ -11,6 +11,7 @@ use Kr0lik\DtoToSwagger\Helper\NameHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
+use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\RequestBody;
@@ -99,7 +100,7 @@ class RequestDescriber implements OperationDescriberInterface
 
         $reflectionClass = new ReflectionClass($class);
 
-        foreach ($reflectionClass->getProperties() as $reflectionProperty) {
+        foreach (ClassHelper::getVisibleProperties($reflectionClass) as $reflectionProperty) {
             foreach ($reflectionProperty->getAttributes() as $reflectionAttribute) {
                 $attributeInstance = $reflectionAttribute->newInstance();
 
@@ -173,7 +174,7 @@ class RequestDescriber implements OperationDescriberInterface
 
         $fileUploadProperties = [];
 
-        foreach ($reflectionClass->getProperties() as $reflectionProperty) {
+        foreach (ClassHelper::getVisibleProperties($reflectionClass) as $reflectionProperty) {
             if (
                 $reflectionProperty->getType() instanceof ReflectionNamedType
                 && (

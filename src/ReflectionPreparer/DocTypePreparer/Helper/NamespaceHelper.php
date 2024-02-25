@@ -21,9 +21,13 @@ class NamespaceHelper
      */
     public static function getNameSpace(string $fromClass, string $type): string
     {
-        if (!array_key_exists($fromClass, self::$register)) {
-            $refClass = new ReflectionClass($fromClass);
+        $refClass = new ReflectionClass($fromClass);
 
+        if (class_exists($refClass->getNamespaceName().'\\'.$type)) {
+            return $refClass->getNamespaceName().'\\'.$type;
+        }
+
+        if (!array_key_exists($fromClass, self::$register)) {
             self::registerUses($refClass);
         }
 

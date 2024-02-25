@@ -10,7 +10,7 @@ use Kr0lik\DtoToSwagger\Contract\JsonResponseInterface;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
-use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\GetHelper;
+use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
 use OpenApi\Annotations\JsonContent;
 use OpenApi\Annotations\Operation;
@@ -65,8 +65,8 @@ class ResponseDescriber implements OperationDescriberInterface
 
             $reflectionClass = new ReflectionClass($returnType->getClassName());
 
-            foreach (GetHelper::getAllAttributes($reflectionClass) as $attribute) {
-                $attributeInstance = $attribute->newInstance();
+            foreach (ClassHelper::getAllAttributes($reflectionClass) as $reflectionAttribute) {
+                $attributeInstance = $reflectionAttribute->newInstance();
 
                 if ($attributeInstance instanceof Response) {
                     Util::createCollectionItem($operation, 'responses', Response::class, (array) $attributeInstance->jsonSerialize());
@@ -103,8 +103,8 @@ class ResponseDescriber implements OperationDescriberInterface
 
         $this->propertyDescriber->describe($jsonContent, [], $returnType);
 
-        foreach (GetHelper::getAllAttributes($reflectionClass) as $attribute) {
-            $attributeInstance = $attribute->newInstance();
+        foreach (ClassHelper::getAllAttributes($reflectionClass) as $reflectionAttribute) {
+            $attributeInstance = $reflectionAttribute->newInstance();
 
             if ($attributeInstance instanceof Wrap) {
                 $this->wrapResponse($jsonContent, $attributeInstance);
