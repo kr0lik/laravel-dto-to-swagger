@@ -291,7 +291,7 @@ components:
       required:
         - int
         - string
-        - dateTime
+        - date
       properties:
         int:
           description: 'Some Description'
@@ -302,7 +302,8 @@ components:
           example:
             - string
             - string2
-        dateTime:
+        date:
           type: string
-          format: date
+          format: date-time
+          pattern: Y-m-d
       type: object

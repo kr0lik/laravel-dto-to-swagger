@@ -37,6 +37,9 @@
     "kr0lik/php-cs-fixer": "^2.0",
     "kr0lik/phpstan-rules": "^2.0"
   },
+  "suggest": {
+    "spatie/laravel-data": "^3.11"
+  },
   "config": {
     "preferred-install": {
       "*": "dist"

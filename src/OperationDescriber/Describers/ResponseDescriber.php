@@ -10,6 +10,7 @@ use Kr0lik\DtoToSwagger\Contract\JsonResponseInterface;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
+use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\GetHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
 use OpenApi\Annotations\JsonContent;
 use OpenApi\Annotations\Operation;
@@ -64,7 +65,7 @@ class ResponseDescriber implements OperationDescriberInterface
 
             $reflectionClass = new ReflectionClass($returnType->getClassName());
 
-            foreach ($reflectionClass->getAttributes() as $attribute) {
+            foreach (GetHelper::getAllAttributes($reflectionClass) as $attribute) {
                 $attributeInstance = $attribute->newInstance();
 
                 if ($attributeInstance instanceof Response) {
@@ -102,7 +103,7 @@ class ResponseDescriber implements OperationDescriberInterface
 
         $this->propertyDescriber->describe($jsonContent, [], $returnType);
 
-        foreach ($reflectionClass->getAttributes() as $attribute) {
+        foreach (GetHelper::getAllAttributes($reflectionClass) as $attribute) {
             $attributeInstance = $attribute->newInstance();
 
             if ($attributeInstance instanceof Wrap) {
