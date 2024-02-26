@@ -7,6 +7,7 @@ namespace Kr0lik\DtoToSwagger\PropertyDescriber\Describers;
 use BackedEnum;
 use DateTimeInterface;
 use Hoa\Zformat\Parameter;
+use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\NameHelper;
 use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
@@ -14,7 +15,7 @@ use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriberInterface;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\PhpDocReader;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
-use Kr0lik\DtoToSwagger\Register\SchemaRegister;
+use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use OpenApi\Annotations\Schema;
 use OpenApi\Attributes\Property;
 use OpenApi\Generator;
@@ -29,7 +30,7 @@ class ObjectPropertyDescriber implements PropertyDescriberInterface
 {
     public function __construct(
         private PropertyDescriber $propertyDescriber,
-        private SchemaRegister $schemaRegister,
+        private OpenApiRegister $schemaRegister,
         private ReflectionPreparer $reflectionPreparer,
         private PhpDocReader $phpDocReader,
         private ?string $fileUploadType,
@@ -38,6 +39,7 @@ class ObjectPropertyDescriber implements PropertyDescriberInterface
     /**
      * @param array<string, mixed> $context
      *
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      */
     public function describe(Schema $property, array $context = [], Type ...$types): void
