@@ -49,7 +49,7 @@ use Kr0lik\DtoToSwagger\ReflectionPreparer\RefTypePreparer\Preparers\ObjectRefTy
 use Kr0lik\DtoToSwagger\ReflectionPreparer\RefTypePreparer\Preparers\StringRefTypePreparer;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\RefTypePreparer\RefTypePreparer;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\RefTypePreparer\RefTypePreparerInterface;
-use Kr0lik\DtoToSwagger\Register\SchemaRegister;
+use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use phpDocumentor\Reflection\DocBlockFactory;
 use Psr\Container\ContainerExceptionInterface;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
@@ -65,12 +65,12 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom($this->configPath(), 'swagger');
 
+        $this->registerOpenApiRegister();
         $this->registerPropertyExtractor();
         $this->registerReflectionTypePreparer();
         $this->registerDocTypePreparer();
         $this->registerPhpDocReader();
         $this->registerReflectionPreparer();
-        $this->registerSchemaRegister();
         $this->registerPropertyDescriber();
         $this->registerOperationDescriber();
         $this->registerRoutingProcessor();
@@ -91,6 +91,16 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     private function configPath(): string
     {
         return __DIR__.'/../config/swagger.php';
+    }
+
+    private function registerOpenApiRegister(): void
+    {
+        $this->app->when(OpenApiRegister::class)
+            ->needs('$openApiConfig')
+            ->give(config('swagger.openApi'))
+        ;
+
+        $this->app->singleton(OpenApiRegister::class, OpenApiRegister::class);
     }
 
     private function registerPropertyExtractor(): void
@@ -185,11 +195,6 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     private function registerReflectionPreparer(): void
     {
         $this->app->singleton(ReflectionPreparer::class, ReflectionPreparer::class);
-    }
-
-    private function registerSchemaRegister(): void
-    {
-        $this->app->singleton(SchemaRegister::class, SchemaRegister::class);
     }
 
     /**
@@ -306,10 +311,6 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
         $this->app->when(SwaggerGenerator::class)
             ->needs('$savePath')
             ->give(config('swagger.savePath'))
-        ;
-        $this->app->when(SwaggerGenerator::class)
-            ->needs('$baseOpenApiConfig')
-            ->give(config('swagger.openApi'))
         ;
 
         $this->commands(SwaggerGenerator::class);
