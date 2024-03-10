@@ -10,6 +10,7 @@ use Kr0lik\DtoToSwagger\Attribute\Context;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\PathParameterDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\SecurityDescriber;
+use Kr0lik\DtoToSwagger\OperationDescriber\Describers\TagDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriber;
 use OpenApi\Annotations\OpenApi;
 use ReflectionException;
@@ -21,10 +22,12 @@ class RouteProcessor
 
     /**
      * @param array<string, array<string, array<mixed>>> $middlewaresToAuth
+     * @param string[]                                   $tagFromMiddlewares
      */
     public function __construct(
         private OperationDescriber $operationDescriber,
         private array $middlewaresToAuth,
+        private array $tagFromMiddlewares,
     ) {}
 
     /**
@@ -43,6 +46,7 @@ class RouteProcessor
             $context = [];
             $context[PathParameterDescriber::IN_PATH_PARAMETERS_CONTEXT] = $this->getParameters($route);
             $context[SecurityDescriber::DEFAULT_SECURITIES_CONTEXT] = $this->getSecurities($route);
+            $context[TagDescriber::DEFAULT_TAGS_CONTEXT] = $this->getTags($route);
 
             $operation = Util::getOperation($pathItem, $method);
 
@@ -101,5 +105,21 @@ class RouteProcessor
         }
 
         return $securities;
+    }
+
+    /**
+     * @return string[]
+     */
+    private function getTags(Route $route): array
+    {
+        $tags = [];
+
+        foreach ((array) $route->middleware() as $middleware) {
+            if (in_array($middleware, $this->tagFromMiddlewares, true)) {
+                $tags[] = $middleware;
+            }
+        }
+
+        return $tags;
     }
 }

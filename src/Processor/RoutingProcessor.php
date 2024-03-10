@@ -16,11 +16,15 @@ class RoutingProcessor
     /**
      * @param string[] $includeMiddlewares
      * @param string[] $includePatterns
+     * @param string[] $excludeMiddlewares
+     * @param string[] $excludePatterns
      */
     public function __construct(
         private RouteProcessor $routeProcessor,
         private array $includeMiddlewares,
         private array $includePatterns,
+        private array $excludeMiddlewares,
+        private array $excludePatterns,
     ) {}
 
     /**
@@ -56,7 +60,9 @@ class RoutingProcessor
     private function isMatch(Route $route): bool
     {
         return $this->isMatchMiddleware($route)
-            && $this->isMatchPattern($route);
+            && $this->isMatchPattern($route)
+            && $this->isNotMatchMiddleware($route)
+            && $this->isNotMatchPattern($route);
     }
 
     private function isMatchMiddleware(Route $route): bool
@@ -72,6 +78,26 @@ class RoutingProcessor
     {
         foreach ($this->includePatterns as $pathPattern) {
             if (false !== preg_match('{'.$pathPattern.'}', $route->uri())) {
+                return true;
+            }
+        }
+
+        return [] === $this->includePatterns;
+    }
+
+    private function isNotMatchMiddleware(Route $route): bool
+    {
+        if ([] !== $this->excludeMiddlewares) {
+            return [] === array_intersect($this->includeMiddlewares, (array) $route->middleware());
+        }
+
+        return true;
+    }
+
+    private function isNotMatchPattern(Route $route): bool
+    {
+        foreach ($this->excludePatterns as $pathPattern) {
+            if (false === preg_match('{'.$pathPattern.'}', $route->uri())) {
                 return true;
             }
         }

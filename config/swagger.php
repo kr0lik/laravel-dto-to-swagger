@@ -9,9 +9,12 @@ return [
     'savePath' => base_path('swagger.yaml'),
     'includeMiddlewares' => ['api'], // string[]
     'includePatterns' => [], // string[]
+    'excludeMiddlewares' => [], // string[]
+    'excludePatterns' => [], // string[]
     'middlewaresToAuth' => ['auth:sanctum' => ['bearerAuth' => []]], // array<string, array<string, array<mixed>>>
     'tagFromControllerName' => true, // bool
     'tagFromActionFolder' => true, // bool
+    'tagFromMiddlewares' => ['api', 'admin', 'web'], // string[]
     'fileUploadType' => SymfonyUploadedFile::class,
     'defaultErrorResponseSchemas' => [
         Response::HTTP_UNPROCESSABLE_ENTITY => [
