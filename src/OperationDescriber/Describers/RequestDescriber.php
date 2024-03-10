@@ -52,15 +52,20 @@ class RequestDescriber implements OperationDescriberInterface
 
                 $this->propertyDescriber->describe($jsonContent, [], ...$types);
 
-                $request = Util::getChild($operation, RequestBody::class);
+                if (
+                    Generator::UNDEFINED !== $jsonContent->properties
+                    && [] !== $jsonContent->properties
+                ) {
+                    $request = Util::getChild($operation, RequestBody::class);
 
-                Util::merge($request, [
-                    'content' => [
-                        'application/json' => [
-                            'schema' => $jsonContent,
+                    Util::merge($request, [
+                        'content' => [
+                            'application/json' => [
+                                'schema' => $jsonContent,
+                            ],
                         ],
-                    ],
-                ], true);
+                    ], true);
+                }
 
                 if ([] !== $this->requestErrorResponseSchemas) {
                     Util::merge($operation, ['responses' => $this->requestErrorResponseSchemas]);
@@ -186,7 +191,7 @@ class RequestDescriber implements OperationDescriberInterface
 
                 $context = ContextHelper::getContext($reflectionProperty);
 
-                $fileUploadProperties[$name] = array_merge($context, ['type' => 'string', 'format' => 'binary']);
+                $fileUploadProperties[$name] = array_merge($context, ['type' => 'string']);
             }
         }
 
