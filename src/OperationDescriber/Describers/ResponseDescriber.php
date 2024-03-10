@@ -69,7 +69,8 @@ class ResponseDescriber implements OperationDescriberInterface
                 $attributeInstance = $reflectionAttribute->newInstance();
 
                 if ($attributeInstance instanceof Response) {
-                    Util::createCollectionItem($operation, 'responses', Response::class, (array) $attributeInstance->jsonSerialize());
+                    $response = Util::getCollectionItem($operation, Response::class);
+                    Util::merge($response, $attributeInstance);
                 }
             }
         }

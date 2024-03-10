@@ -293,6 +293,11 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
             ->give(config('swagger.middlewaresToAuth', []))
         ;
 
+        $this->app->when(RouteProcessor::class)
+            ->needs('$tagFromMiddlewares')
+            ->give(config('swagger.tagFromMiddlewares', []))
+        ;
+
         $this->app->when(RoutingProcessor::class)
             ->needs('$includeMiddlewares')
             ->give(config('swagger.includeMiddlewares', []))
@@ -300,6 +305,15 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
         $this->app->when(RoutingProcessor::class)
             ->needs('$includePatterns')
             ->give(config('swagger.includePatterns', []))
+        ;
+
+        $this->app->when(RoutingProcessor::class)
+            ->needs('$excludeMiddlewares')
+            ->give(config('swagger.excludeMiddlewares', []))
+        ;
+        $this->app->when(RoutingProcessor::class)
+            ->needs('$excludePatterns')
+            ->give(config('swagger.excludePatterns', []))
         ;
 
         $this->app->singleton(RouteProcessor::class, RouteProcessor::class);
