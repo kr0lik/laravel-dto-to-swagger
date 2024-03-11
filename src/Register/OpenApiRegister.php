@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Kr0lik\DtoToSwagger\Register;
 
+use InvalidArgumentException;
+use Kr0lik\DtoToSwagger\Helper\Util;
 use OpenApi\Annotations\Components;
 use OpenApi\Annotations\OpenApi;
+use OpenApi\Annotations\PathItem;
 use OpenApi\Annotations\Schema;
 use OpenApi\Generator;
 
@@ -23,9 +26,28 @@ final class OpenApiRegister
         private array $openApiConfig,
     ) {}
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function initOpenApi(): OpenApi
     {
         $this->openApi = new OpenApi($this->openApiConfig);
+
+        $paths = $this->openApi->paths;
+
+        if (Generator::UNDEFINED !== $paths) {
+            /** @phpstan-ignore-next-line  */
+            $this->openApi->paths = Generator::UNDEFINED;
+
+            foreach ($paths as $route => $pathData) {
+                if ($pathData instanceof PathItem) {
+                    continue;
+                }
+
+                $pathItem = Util::getPath($this->openApi, $route);
+                Util::merge($pathItem, $pathData);
+            }
+        }
 
         return $this->openApi;
     }
@@ -91,6 +113,6 @@ final class OpenApiRegister
 
     private function getShortName(string $class): string
     {
-        return basename(str_replace('\\', '/', $class), 'Dto');
+        return basename(str_replace('\\', '/', $class));
     }
 }

@@ -53,8 +53,8 @@ class RequestDescriber implements OperationDescriberInterface
                 $this->propertyDescriber->describe($jsonContent, [], ...$types);
 
                 if (
-                    Generator::UNDEFINED !== $jsonContent->properties
-                    && [] !== $jsonContent->properties
+                    (Generator::UNDEFINED !== $jsonContent->properties && [] !== $jsonContent->properties)
+                    || Generator::UNDEFINED !== $jsonContent->ref
                 ) {
                     $request = Util::getChild($operation, RequestBody::class);
 
