@@ -76,13 +76,17 @@ class RoutingProcessor
 
     private function isMatchPattern(Route $route): bool
     {
+        if ([] === $this->includePatterns) {
+            return true;
+        }
+
         foreach ($this->includePatterns as $pathPattern) {
-            if (false !== preg_match('{'.$pathPattern.'}', $route->uri())) {
+            if (0 !== preg_match('/'.$pathPattern.'/', $route->uri())) {
                 return true;
             }
         }
 
-        return [] === $this->includePatterns;
+        return false;
     }
 
     private function isNotMatchExcludeMiddleware(Route $route): bool
@@ -96,12 +100,16 @@ class RoutingProcessor
 
     private function isNotMatchExcludePattern(Route $route): bool
     {
+        if ([] === $this->excludePatterns) {
+            return true;
+        }
+
         foreach ($this->excludePatterns as $pathPattern) {
-            if (false !== preg_match('{'.$pathPattern.'}', $route->uri())) {
+            if (0 !== preg_match('/'.$pathPattern.'/', $route->uri())) {
                 return false;
             }
         }
 
-        return [] === $this->includePatterns;
+        return true;
     }
 }
