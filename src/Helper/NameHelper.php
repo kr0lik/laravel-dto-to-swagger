@@ -7,6 +7,7 @@ namespace Kr0lik\DtoToSwagger\Helper;
 use Kr0lik\DtoToSwagger\Attribute\Name;
 use ReflectionAttribute;
 use ReflectionProperty;
+use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\MapOutputName;
 
 class NameHelper
@@ -32,10 +33,10 @@ class NameHelper
 
     private static function fromLaravelData(ReflectionAttribute $attribute): ?string
     {
-        if (class_exists(MapOutputName::class)) {
+        if (class_exists(MapInputName::class) || class_exists(MapOutputName::class)) {
             $attributeInstance = $attribute->newInstance();
 
-            if ($attributeInstance instanceof MapOutputName) {
+            if ($attributeInstance instanceof MapInputName || $attributeInstance instanceof MapOutputName) {
                 return (string) $attributeInstance->output;
             }
         }
