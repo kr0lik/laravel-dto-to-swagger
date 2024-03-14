@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Kr0lik\DtoToSwagger\PropertyDescriber;
+namespace Kr0lik\DtoToSwagger\PropertyTypeDescriber;
 
 use OpenApi\Annotations\Schema;
 use Symfony\Component\PropertyInfo\Type;
 
-final class PropertyDescriber
+final class PropertyTypeDescriber
 {
     /**
-     * @var PropertyDescriberInterface[]
+     * @var PropertyTypeDescriberInterface[]
      */
     private array $propertyDescribers;
 
-    public function addPropertyDescriber(PropertyDescriberInterface $propertyDescriber): void
+    public function addPropertyDescriber(PropertyTypeDescriberInterface $propertyDescriber): void
     {
         $this->propertyDescribers[] = $propertyDescriber;
     }
@@ -30,7 +30,7 @@ final class PropertyDescriber
     }
 
     /**
-     * @return iterable<PropertyDescriberInterface>
+     * @return iterable<PropertyTypeDescriberInterface>
      */
     private function getPropertyDescriber(Type ...$types): iterable
     {

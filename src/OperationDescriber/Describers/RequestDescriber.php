@@ -10,7 +10,7 @@ use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\NameHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
 use OpenApi\Annotations\Operation;
@@ -30,7 +30,7 @@ class RequestDescriber implements OperationDescriberInterface
      * @param array<int, array<string, mixed>> $requestErrorResponseSchemas
      */
     public function __construct(
-        private PropertyDescriber $propertyDescriber,
+        private PropertyTypeDescriber $propertyDescriber,
         private ReflectionPreparer $reflectionPreparer,
         private array $requestErrorResponseSchemas,
         private ?string $fileUploadType,
@@ -52,10 +52,7 @@ class RequestDescriber implements OperationDescriberInterface
 
                 $this->propertyDescriber->describe($jsonContent, [], ...$types);
 
-                if (
-                    (Generator::UNDEFINED !== $jsonContent->properties && [] !== $jsonContent->properties)
-                    || Generator::UNDEFINED !== $jsonContent->ref
-                ) {
+                if ($this->isNotEmpty($jsonContent)) {
                     $request = Util::getChild($operation, RequestBody::class);
 
                     Util::merge($request, [
@@ -196,5 +193,11 @@ class RequestDescriber implements OperationDescriberInterface
         }
 
         return $fileUploadProperties;
+    }
+
+    private function isNotEmpty(Schema $schema): bool
+    {
+        return (Generator::UNDEFINED !== $schema->properties && [] !== $schema->properties)
+            || Generator::UNDEFINED !== $schema->ref;
     }
 }

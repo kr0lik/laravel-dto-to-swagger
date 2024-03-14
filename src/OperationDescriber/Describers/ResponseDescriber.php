@@ -9,7 +9,7 @@ use Kr0lik\DtoToSwagger\Attribute\Wrap;
 use Kr0lik\DtoToSwagger\Contract\JsonResponseInterface;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
 use OpenApi\Annotations\JsonContent;
@@ -27,7 +27,7 @@ class ResponseDescriber implements OperationDescriberInterface
      * @param array<int, array<string, mixed>> $defaultErrorResponseSchemas
      */
     public function __construct(
-        private PropertyDescriber $propertyDescriber,
+        private PropertyTypeDescriber $propertyDescriber,
         private ReflectionPreparer $reflectionPreparer,
         private array $defaultErrorResponseSchemas,
     ) {}

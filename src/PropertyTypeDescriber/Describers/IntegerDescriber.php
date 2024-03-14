@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Kr0lik\DtoToSwagger\PropertyDescriber\Describers;
+namespace Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers;
 
 use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Helper\Util;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriberInterface;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriberInterface;
 use OpenApi\Annotations\Schema;
 use Symfony\Component\PropertyInfo\Type;
 
-class StringPropertyDescriber implements PropertyDescriberInterface
+class IntegerDescriber implements PropertyTypeDescriberInterface
 {
     /**
      * @param array<string, mixed> $context
@@ -19,13 +19,13 @@ class StringPropertyDescriber implements PropertyDescriberInterface
      */
     public function describe(Schema $property, array $context = [], Type ...$types): void
     {
-        $property->type = 'string';
+        $property->type = 'integer';
 
         Util::merge($property, $context, true);
     }
 
     public function supports(Type ...$types): bool
     {
-        return 1 === count($types) && Type::BUILTIN_TYPE_STRING === $types[0]->getBuiltinType();
+        return 1 === count($types) && Type::BUILTIN_TYPE_INT === $types[0]->getBuiltinType();
     }
 }

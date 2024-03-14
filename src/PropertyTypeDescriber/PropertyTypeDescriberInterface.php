@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Kr0lik\DtoToSwagger\PropertyDescriber;
+namespace Kr0lik\DtoToSwagger\PropertyTypeDescriber;
 
 use OpenApi\Annotations\Schema;
 use Symfony\Component\PropertyInfo\Type;
 
-interface PropertyDescriberInterface
+interface PropertyTypeDescriberInterface
 {
     /**
      * @param array<string, mixed> $context

@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Attribute\Context;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\Parameter;
@@ -20,7 +20,7 @@ class PathParameterDescriber implements OperationDescriberInterface
     public const IN_PATH_PARAMETERS_CONTEXT = 'inPathParameters';
 
     public function __construct(
-        private PropertyDescriber $propertyDescriber,
+        private PropertyTypeDescriber $propertyDescriber,
         private ReflectionPreparer $reflectionPreparer,
     ) {}
 

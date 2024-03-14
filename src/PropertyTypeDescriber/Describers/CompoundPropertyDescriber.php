@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Kr0lik\DtoToSwagger\PropertyDescriber\Describers;
+namespace Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers;
 
 use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Helper\Util;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriberInterface;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriberInterface;
 use OpenApi\Annotations\Schema;
 use OpenApi\Generator;
 use Symfony\Component\PropertyInfo\Type;
 
-class CompoundPropertyDescriber implements PropertyDescriberInterface
+class CompoundPropertyDescriber implements PropertyTypeDescriberInterface
 {
     public function __construct(
-        private PropertyDescriber $propertyDescriber
+        private PropertyTypeDescriber $propertyDescriber
     ) {}
 
     /**

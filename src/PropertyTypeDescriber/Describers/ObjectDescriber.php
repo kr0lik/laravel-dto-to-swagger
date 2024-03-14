@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Kr0lik\DtoToSwagger\PropertyDescriber\Describers;
+namespace Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers;
 
 use BackedEnum;
 use DateTimeInterface;
@@ -10,8 +10,8 @@ use Hoa\Zformat\Parameter;
 use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\NameHelper;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriberInterface;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriberInterface;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\PhpDocReader;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
@@ -26,10 +26,10 @@ use ReflectionProperty;
 use stdClass;
 use Symfony\Component\PropertyInfo\Type;
 
-class ObjectPropertyDescriber implements PropertyDescriberInterface
+class ObjectDescriber implements PropertyTypeDescriberInterface
 {
     public function __construct(
-        private PropertyDescriber $propertyDescriber,
+        private PropertyTypeDescriber $propertyDescriber,
         private OpenApiRegister $schemaRegister,
         private ReflectionPreparer $reflectionPreparer,
         private PhpDocReader $phpDocReader,
@@ -85,10 +85,10 @@ class ObjectPropertyDescriber implements PropertyDescriberInterface
 
         $this->fillProperties($schema, $reflectionClass);
 
-        if (
-            Generator::UNDEFINED === $schema->properties
-            || [] === $schema->properties
-        ) {
+        $isEmptySchema = Generator::UNDEFINED === $schema->properties
+            || [] === $schema->properties;
+
+        if ($isEmptySchema) {
             return null;
         }
 
@@ -98,14 +98,7 @@ class ObjectPropertyDescriber implements PropertyDescriberInterface
     private function fillProperties(Schema $schema, ReflectionClass $reflectionClass): void
     {
         foreach (ClassHelper::getVisibleProperties($reflectionClass) as $reflectionProperty) {
-            if (
-                null !== $this->fileUploadType && '' !== $this->fileUploadType
-                && $reflectionProperty->getType() instanceof ReflectionNamedType
-                && (
-                    $reflectionProperty->getType()->getName() === $this->fileUploadType
-                    || is_subclass_of($reflectionProperty->getType()->getName(), $this->fileUploadType)
-                )
-            ) {
+            if ($this->isFileUploadProperty($reflectionProperty)) {
                 continue;
             }
 
@@ -181,5 +174,15 @@ class ObjectPropertyDescriber implements PropertyDescriberInterface
         }
 
         return true;
+    }
+
+    private function isFileUploadProperty(ReflectionProperty $reflectionProperty): bool
+    {
+        return null !== $this->fileUploadType && '' !== $this->fileUploadType
+        && $reflectionProperty->getType() instanceof ReflectionNamedType
+        && (
+            $reflectionProperty->getType()->getName() === $this->fileUploadType
+            || is_subclass_of($reflectionProperty->getType()->getName(), $this->fileUploadType)
+        );
     }
 }

@@ -33,7 +33,7 @@ class NameHelper
 
     private static function fromLaravelData(ReflectionAttribute $attribute): ?string
     {
-        if (class_exists(MapInputName::class) || class_exists(MapOutputName::class)) {
+        if (class_exists(MapInputName::class) && class_exists(MapOutputName::class)) {
             $attributeInstance = $attribute->newInstance();
 
             if ($attributeInstance instanceof MapInputName || $attributeInstance instanceof MapOutputName) {
