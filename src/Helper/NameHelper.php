@@ -36,7 +36,11 @@ class NameHelper
         if (class_exists(MapInputName::class) && class_exists(MapOutputName::class)) {
             $attributeInstance = $attribute->newInstance();
 
-            if ($attributeInstance instanceof MapInputName || $attributeInstance instanceof MapOutputName) {
+            if ($attributeInstance instanceof MapInputName) {
+                return (string) $attributeInstance->input;
+            }
+
+            if ($attributeInstance instanceof MapOutputName) {
                 return (string) $attributeInstance->output;
             }
         }
