@@ -25,11 +25,22 @@ class CompoundPropertyDescriber implements PropertyTypeDescriberInterface
      */
     public function describe(Schema $property, array $context = [], Type ...$types): void
     {
+        $hasNullable = $this->hasNullable(...$types);
+
+        if ($hasNullable && 2 === count($types)) {
+            foreach ($types as $type) {
+                $this->propertyDescriber->describe($property, $context, $type);
+            }
+
+            return;
+        }
+
         $property->oneOf = Generator::UNDEFINED !== $property->oneOf ? $property->oneOf : [];
 
         foreach ($types as $type) {
             /** @var Schema $schema */
             $schema = Util::createChild($property, Schema::class);
+
             $property->oneOf[] = $schema;
 
             $this->propertyDescriber->describe($schema, $context, $type);
@@ -39,5 +50,16 @@ class CompoundPropertyDescriber implements PropertyTypeDescriberInterface
     public function supports(Type ...$types): bool
     {
         return count($types) >= 2;
+    }
+
+    private function hasNullable(Type ...$types): bool
+    {
+        foreach ($types as $type) {
+            if (Type::BUILTIN_TYPE_NULL === $type->getBuiltinType()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -6,7 +6,6 @@ namespace Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers;
 
 use BackedEnum;
 use DateTimeInterface;
-use Hoa\Zformat\Parameter;
 use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\NameHelper;
@@ -17,6 +16,7 @@ use Kr0lik\DtoToSwagger\ReflectionPreparer\PhpDocReader;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
 use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use OpenApi\Annotations\Schema;
+use OpenApi\Attributes\Parameter;
 use OpenApi\Attributes\Property;
 use OpenApi\Generator;
 use ReflectionClass;
