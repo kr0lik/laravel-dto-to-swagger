@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Kr0lik\DtoToSwagger\PropertyDescriber\Describers;
+namespace Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers;
 
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriberInterface;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriberInterface;
 use OpenApi\Annotations\Schema;
 use OpenApi\Generator;
 use Symfony\Component\PropertyInfo\Type;
 
-final class NullablePropertyDescriber implements PropertyDescriberInterface
+final class NullableDescriber implements PropertyTypeDescriberInterface
 {
     /**
      * @param array<string, mixed> $context

@@ -10,7 +10,7 @@ use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\NameHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\PhpDocReader;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
@@ -29,7 +29,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
 
     public function __construct(
         private ReflectionPreparer $reflectionPreparer,
-        private PropertyDescriber $propertyDescriber,
+        private PropertyTypeDescriber $propertyDescriber,
         private PhpDocReader $phpDocReader,
     ) {}
 

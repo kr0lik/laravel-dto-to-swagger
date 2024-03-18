@@ -19,18 +19,18 @@ use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\Processor\RouteProcessor;
 use Kr0lik\DtoToSwagger\Processor\RoutingProcessor;
-use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\ArrayPropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\BooleanPropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\CompoundPropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\DateTimePropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\EnumPropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\FloatPropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\IntegerPropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\NullablePropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\ObjectPropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\Describers\StringPropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriberInterface;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\ArrayDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\BooleanDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\CompoundPropertyDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\DateTimeDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\EnumDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\FloatDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\IntegerDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\NullableDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\ObjectDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\StringDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriberInterface;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\DocTypePreparer\DocTypePreparer;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\DocTypePreparer\DocTypePreparerInterface;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\DocTypePreparer\Preparers\ArrayDocTypePreparer;
@@ -71,7 +71,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
         $this->registerDocTypePreparer();
         $this->registerPhpDocReader();
         $this->registerReflectionPreparer();
-        $this->registerPropertyDescriber();
+        $this->registerPropertyTypeDescriber();
         $this->registerOperationDescriber();
         $this->registerRoutingProcessor();
         $this->registerCommand();
@@ -252,34 +252,34 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     /**
      * @throws ContainerExceptionInterface
      */
-    private function registerPropertyDescriber(): void
+    private function registerPropertyTypeDescriber(): void
     {
-        $this->app->when(ObjectPropertyDescriber::class)
+        $this->app->when(ObjectDescriber::class)
             ->needs('$fileUploadType')
             ->give(config('swagger.fileUploadType'))
         ;
 
-        $this->app->bind(PropertyDescriberInterface::class, static function (): array {
+        $this->app->bind(PropertyTypeDescriberInterface::class, static function (): array {
             return [
-                StringPropertyDescriber::class,
-                IntegerPropertyDescriber::class,
-                BooleanPropertyDescriber::class,
-                FloatPropertyDescriber::class,
-                DateTimePropertyDescriber::class,
-                EnumPropertyDescriber::class,
-                NullablePropertyDescriber::class,
-                ArrayPropertyDescriber::class,
+                StringDescriber::class,
+                IntegerDescriber::class,
+                BooleanDescriber::class,
+                FloatDescriber::class,
+                DateTimeDescriber::class,
+                EnumDescriber::class,
+                NullableDescriber::class,
+                ArrayDescriber::class,
                 CompoundPropertyDescriber::class,
-                ObjectPropertyDescriber::class,
+                ObjectDescriber::class,
             ];
         });
 
-        $this->app->singleton(PropertyDescriber::class, PropertyDescriber::class);
+        $this->app->singleton(PropertyTypeDescriber::class, PropertyTypeDescriber::class);
 
-        /** @var PropertyDescriber $propertyDescriber */
-        $propertyDescriber = $this->app->get(PropertyDescriber::class);
-        /** @var class-string<PropertyDescriberInterface>[] $propertyDescriberClasses */
-        $propertyDescriberClasses = $this->app->get(PropertyDescriberInterface::class);
+        /** @var PropertyTypeDescriber $propertyDescriber */
+        $propertyDescriber = $this->app->get(PropertyTypeDescriber::class);
+        /** @var class-string<PropertyTypeDescriberInterface>[] $propertyDescriberClasses */
+        $propertyDescriberClasses = $this->app->get(PropertyTypeDescriberInterface::class);
 
         foreach ($propertyDescriberClasses as $describer) {
             $propertyDescriber->addPropertyDescriber($this->app->make($describer));

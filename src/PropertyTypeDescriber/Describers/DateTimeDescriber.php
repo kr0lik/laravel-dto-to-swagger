@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Kr0lik\DtoToSwagger\PropertyDescriber\Describers;
+namespace Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers;
 
 use DateTimeInterface;
 use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Helper\Util;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriberInterface;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriberInterface;
 use OpenApi\Annotations\Schema;
 use Symfony\Component\PropertyInfo\Type;
 
-class DateTimePropertyDescriber implements PropertyDescriberInterface
+class DateTimeDescriber implements PropertyTypeDescriberInterface
 {
     /**
      * @param array<string, mixed> $context

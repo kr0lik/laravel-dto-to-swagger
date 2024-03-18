@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Kr0lik\DtoToSwagger\PropertyDescriber\Describers;
+namespace Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers;
 
 use BackedEnum;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriber;
-use Kr0lik\DtoToSwagger\PropertyDescriber\PropertyDescriberInterface;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriberInterface;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\RefTypePreparer\RefTypePreparer;
 use OpenApi\Annotations\Schema;
 use ReflectionEnum;
@@ -14,10 +14,10 @@ use ReflectionEnumUnitCase;
 use ReflectionException;
 use Symfony\Component\PropertyInfo\Type;
 
-class EnumPropertyDescriber implements PropertyDescriberInterface
+class EnumDescriber implements PropertyTypeDescriberInterface
 {
     public function __construct(
-        private PropertyDescriber $propertyDescriber,
+        private PropertyTypeDescriber $propertyDescriber,
         private RefTypePreparer $refTypePreparer,
     ) {}
 
