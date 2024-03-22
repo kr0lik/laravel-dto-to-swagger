@@ -97,7 +97,7 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
     private function fillProperties(Schema $schema, ReflectionClass $reflectionClass): void
     {
-        foreach (ClassHelper::getVisibleProperties($reflectionClass) as $reflectionProperty) {
+        foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
             if ($this->isFileUploadProperty($reflectionProperty)) {
                 continue;
             }
