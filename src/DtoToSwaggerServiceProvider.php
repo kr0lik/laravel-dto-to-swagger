@@ -254,11 +254,6 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
      */
     private function registerPropertyTypeDescriber(): void
     {
-        $this->app->when(ObjectDescriber::class)
-            ->needs('$fileUploadType')
-            ->give(config('swagger.fileUploadType'))
-        ;
-
         $this->app->bind(PropertyTypeDescriberInterface::class, static function (): array {
             return [
                 StringDescriber::class,
