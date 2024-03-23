@@ -40,7 +40,7 @@ class ClassHelper
             return;
         }
 
-        self::getAttributesRecursively($reflectionParentClass);
+        yield from self::getAttributesRecursively($reflectionParentClass);
     }
 
     /**
@@ -62,7 +62,7 @@ class ClassHelper
             return;
         }
 
-        self::getVisiblePropertiesRecursively($reflectionParentClass);
+        yield from self::getVisiblePropertiesRecursively($reflectionParentClass);
     }
 
     private static function isVisible(ReflectionClass $reflectionClass, ReflectionProperty $reflectionProperty): bool

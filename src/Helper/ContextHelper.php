@@ -80,6 +80,6 @@ class ContextHelper
 
     private static function phpToSwaggerDateTimeFormat(string $format): string
     {
-        return str_replace(['Y', 'm', 'd', 'H', 'i', 's'], ['YYYY', 'MM', 'DD', 'HH', 'mm', 'ss'], $format);
+        return str_replace(['Y', 'm', 'd', 'H', 'i', 's', 'P'], ['YYYY', 'MM', 'DD', 'HH', 'mm', 'ss', 'Z'], $format);
     }
 }
