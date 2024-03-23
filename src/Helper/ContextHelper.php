@@ -56,7 +56,7 @@ class ContextHelper
                     $format = $attributeInstance->arguments['format'] ?? '';
 
                     if ('' !== $format) {
-                        $context = new Context(format: $context->format, pattern: $format);
+                        $context = new Context(format: $context->format, pattern: self::phpToSwaggerDateTimeFormat($format));
                     }
                 }
             }
@@ -72,9 +72,14 @@ class ContextHelper
                 $format = $attributeInstance->parameters()[0] ?? '';
 
                 if ('' !== $format) {
-                    $context = new Context(format: $context->format, pattern: $format);
+                    $context = new Context(format: $context->format, pattern: self::phpToSwaggerDateTimeFormat($format));
                 }
             }
         }
+    }
+
+    private static function phpToSwaggerDateTimeFormat(string $format): string
+    {
+        return str_replace(['Y', 'm', 'd', 'H', 'i', 's'], ['YYYY', 'MM', 'DD', 'HH', 'mm', 'ss'], $format);
     }
 }

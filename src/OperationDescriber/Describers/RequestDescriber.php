@@ -102,7 +102,7 @@ class RequestDescriber implements OperationDescriberInterface
 
         $reflectionClass = new ReflectionClass($class);
 
-        foreach (ClassHelper::getVisibleProperties($reflectionClass) as $reflectionProperty) {
+        foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
             foreach ($reflectionProperty->getAttributes() as $reflectionAttribute) {
                 $attributeInstance = $reflectionAttribute->newInstance();
 
@@ -176,7 +176,7 @@ class RequestDescriber implements OperationDescriberInterface
 
         $fileUploadProperties = [];
 
-        foreach (ClassHelper::getVisibleProperties($reflectionClass) as $reflectionProperty) {
+        foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
             if (
                 $reflectionProperty->getType() instanceof ReflectionNamedType
                 && (
