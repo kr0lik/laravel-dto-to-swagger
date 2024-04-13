@@ -65,7 +65,7 @@ class ResponseDescriber implements OperationDescriberInterface
 
             $reflectionClass = new ReflectionClass($returnType->getClassName());
 
-            foreach (ClassHelper::getAllAttributes($reflectionClass) as $reflectionAttribute) {
+            foreach (ClassHelper::getAttributesRecursively($reflectionClass) as $reflectionAttribute) {
                 $attributeInstance = $reflectionAttribute->newInstance();
 
                 if ($attributeInstance instanceof Response) {
@@ -106,7 +106,7 @@ class ResponseDescriber implements OperationDescriberInterface
 
         $this->propertyDescriber->describe($jsonContent, [], $returnType);
 
-        foreach (ClassHelper::getAllAttributes($reflectionClass) as $reflectionAttribute) {
+        foreach (ClassHelper::getAttributesRecursively($reflectionClass) as $reflectionAttribute) {
             $attributeInstance = $reflectionAttribute->newInstance();
 
             if ($attributeInstance instanceof Wrap) {

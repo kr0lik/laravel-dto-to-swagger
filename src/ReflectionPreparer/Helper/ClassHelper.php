@@ -10,10 +10,25 @@ use ReflectionProperty;
 
 class ClassHelper
 {
+    public static function isImplementsRecursively(ReflectionClass $reflectionClass, string $interface): bool
+    {
+        if ($reflectionClass->implementsInterface($interface)) {
+            return true;
+        }
+
+        $reflectionParentClass = $reflectionClass->getParentClass();
+
+        if (false === $reflectionParentClass) {
+            return false;
+        }
+
+        return self::isImplementsRecursively($reflectionParentClass, $interface);
+    }
+
     /**
      * @return iterable<ReflectionAttribute>
      */
-    public static function getAllAttributes(ReflectionClass $reflectionClass): iterable
+    public static function getAttributesRecursively(ReflectionClass $reflectionClass): iterable
     {
         foreach ($reflectionClass->getAttributes() as $reflectionAttribute) {
             yield $reflectionAttribute;
@@ -25,15 +40,13 @@ class ClassHelper
             return;
         }
 
-        foreach ($reflectionParentClass->getAttributes() as $attribute) {
-            yield $attribute;
-        }
+        yield from self::getAttributesRecursively($reflectionParentClass);
     }
 
     /**
      * @return iterable<ReflectionProperty>
      */
-    public static function getVisibleProperties(ReflectionClass $reflectionClass): iterable
+    public static function getVisiblePropertiesRecursively(ReflectionClass $reflectionClass): iterable
     {
         foreach ($reflectionClass->getProperties() as $reflectionProperty) {
             if (!self::isVisible($reflectionClass, $reflectionProperty)) {
@@ -49,13 +62,7 @@ class ClassHelper
             return;
         }
 
-        foreach ($reflectionParentClass->getProperties() as $reflectionProperty) {
-            if (!self::isVisible($reflectionClass, $reflectionProperty)) {
-                continue;
-            }
-
-            yield $reflectionProperty;
-        }
+        yield from self::getVisiblePropertiesRecursively($reflectionParentClass);
     }
 
     private static function isVisible(ReflectionClass $reflectionClass, ReflectionProperty $reflectionProperty): bool

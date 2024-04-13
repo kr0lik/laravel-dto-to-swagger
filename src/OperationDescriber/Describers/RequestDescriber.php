@@ -10,6 +10,7 @@ use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\NameHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\ObjectDescriber;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
@@ -50,7 +51,13 @@ class RequestDescriber implements OperationDescriberInterface
             if (1 === count($types) && is_subclass_of($types[0]->getClassName(), JsonRequestInterface::class)) {
                 $jsonContent = new Schema([]);
 
-                $this->propertyDescriber->describe($jsonContent, [], ...$types);
+                $context[ObjectDescriber::SKIP_ATTRIBUTES_CONTEXT] = [Parameter::class];
+
+                if (null === $this->fileUploadType || '' === $this->fileUploadType) {
+                    $context[ObjectDescriber::SKIP_TYPES_CONTEXT] = [$this->fileUploadType];
+                }
+
+                $this->propertyDescriber->describe($jsonContent, $context, ...$types);
 
                 if ($this->isNotEmpty($jsonContent)) {
                     $request = Util::getChild($operation, RequestBody::class);
@@ -102,7 +109,7 @@ class RequestDescriber implements OperationDescriberInterface
 
         $reflectionClass = new ReflectionClass($class);
 
-        foreach (ClassHelper::getVisibleProperties($reflectionClass) as $reflectionProperty) {
+        foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
             foreach ($reflectionProperty->getAttributes() as $reflectionAttribute) {
                 $attributeInstance = $reflectionAttribute->newInstance();
 
@@ -176,7 +183,7 @@ class RequestDescriber implements OperationDescriberInterface
 
         $fileUploadProperties = [];
 
-        foreach (ClassHelper::getVisibleProperties($reflectionClass) as $reflectionProperty) {
+        foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
             if (
                 $reflectionProperty->getType() instanceof ReflectionNamedType
                 && (

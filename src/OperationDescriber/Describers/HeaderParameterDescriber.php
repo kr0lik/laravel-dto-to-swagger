@@ -72,7 +72,7 @@ class HeaderParameterDescriber implements OperationDescriberInterface
      */
     private function addHeaderParametersFromObject(Operation $operation, ReflectionClass $reflectionClass): void
     {
-        foreach (ClassHelper::getVisibleProperties($reflectionClass) as $reflectionProperty) {
+        foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
             $parameter = $this->getParameter($operation, $reflectionProperty);
 
             Util::merge($parameter, [

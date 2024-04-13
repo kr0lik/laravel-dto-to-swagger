@@ -16,9 +16,9 @@ use Kr0lik\DtoToSwagger\ReflectionPreparer\PhpDocReader;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
 use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use OpenApi\Annotations\Schema;
-use OpenApi\Attributes\Parameter;
 use OpenApi\Attributes\Property;
 use OpenApi\Generator;
+use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionNamedType;
@@ -28,12 +28,14 @@ use Symfony\Component\PropertyInfo\Type;
 
 class ObjectDescriber implements PropertyTypeDescriberInterface
 {
+    public const SKIP_TYPES_CONTEXT = 'object_type_describer_skip_types';
+    public const SKIP_ATTRIBUTES_CONTEXT = 'object_type_describer_skip_attributes';
+
     public function __construct(
         private PropertyTypeDescriber $propertyDescriber,
         private OpenApiRegister $schemaRegister,
         private ReflectionPreparer $reflectionPreparer,
         private PhpDocReader $phpDocReader,
-        private ?string $fileUploadType,
     ) {}
 
     /**
@@ -62,7 +64,7 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
         $reflectionClass = new ReflectionClass($class);
 
-        $schema = $this->getSchema($reflectionClass);
+        $schema = $this->getSchema($reflectionClass, $context);
 
         if (null === $schema) {
             return;
@@ -79,11 +81,14 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
             && !is_a($types[0]->getClassName(), BackedEnum::class, true);
     }
 
-    private function getSchema(ReflectionClass $reflectionClass): ?Schema
+    /**
+     * @param array<string, mixed> $context
+     */
+    private function getSchema(ReflectionClass $reflectionClass, array $context): ?Schema
     {
         $schema = new Schema(['type' => 'object']);
 
-        $this->fillProperties($schema, $reflectionClass);
+        $this->fillProperties($schema, $reflectionClass, $context);
 
         $isEmptySchema = Generator::UNDEFINED === $schema->properties
             || [] === $schema->properties;
@@ -95,14 +100,17 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
         return $schema;
     }
 
-    private function fillProperties(Schema $schema, ReflectionClass $reflectionClass): void
+    /**
+     * @param array<string, mixed> $context
+     */
+    private function fillProperties(Schema $schema, ReflectionClass $reflectionClass, array $context): void
     {
-        foreach (ClassHelper::getVisibleProperties($reflectionClass) as $reflectionProperty) {
-            if ($this->isFileUploadProperty($reflectionProperty)) {
+        foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
+            if ($this->isShouldSkipType($reflectionProperty, $context)) {
                 continue;
             }
 
-            $propertySchema = $this->getPropertySchema($reflectionProperty);
+            $propertySchema = $this->getPropertySchema($reflectionProperty, $context);
 
             if (null === $propertySchema) {
                 continue;
@@ -130,19 +138,22 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
         }
     }
 
-    private function getPropertySchema(ReflectionProperty $reflectionProperty): ?Property
+    /**
+     * @param array<string, mixed> $context
+     */
+    private function getPropertySchema(ReflectionProperty $reflectionProperty, array $context): ?Property
     {
         $propertySchema = new Property();
 
         foreach ($reflectionProperty->getAttributes() as $attribute) {
+            if ($this->isShouldSkipByAttribute($attribute, $context)) {
+                return null;
+            }
+
             $attributeInstance = $attribute->newInstance();
 
             if ($attributeInstance instanceof Property) {
                 $propertySchema = $attributeInstance;
-            }
-
-            if ($attributeInstance instanceof Parameter) {
-                return null;
             }
         }
 
@@ -176,13 +187,63 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
         return true;
     }
 
-    private function isFileUploadProperty(ReflectionProperty $reflectionProperty): bool
+    /**
+     * @param array<string, mixed> $context
+     */
+    private function isShouldSkipType(ReflectionProperty $reflectionProperty, array $context): bool
     {
-        return null !== $this->fileUploadType && '' !== $this->fileUploadType
-        && $reflectionProperty->getType() instanceof ReflectionNamedType
-        && (
-            $reflectionProperty->getType()->getName() === $this->fileUploadType
-            || is_subclass_of($reflectionProperty->getType()->getName(), $this->fileUploadType)
-        );
+        if (
+            !array_key_exists(self::SKIP_TYPES_CONTEXT, $context)
+            || !is_array($context[self::SKIP_TYPES_CONTEXT])
+            || [] === $context[self::SKIP_TYPES_CONTEXT]
+        ) {
+            return false;
+        }
+
+        $reflectionType = $reflectionProperty->getType();
+
+        if (!$reflectionType instanceof ReflectionNamedType) {
+            return false;
+        }
+
+        foreach ($context[self::SKIP_TYPES_CONTEXT] as $class) {
+            if ($reflectionType === $class) {
+                return true;
+            }
+
+            if (is_subclass_of($reflectionType->getName(), $class)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param array<string, mixed> $context
+     */
+    private function isShouldSkipByAttribute(ReflectionAttribute $reflectionAttribute, array $context): bool
+    {
+        if (
+            !array_key_exists(self::SKIP_ATTRIBUTES_CONTEXT, $context)
+            || !is_array($context[self::SKIP_ATTRIBUTES_CONTEXT])
+            || [] === $context[self::SKIP_ATTRIBUTES_CONTEXT]
+        ) {
+            return false;
+        }
+
+        $attributeInstance = $reflectionAttribute->newInstance();
+
+        foreach ($context[self::SKIP_ATTRIBUTES_CONTEXT] as $class) {
+            if (is_a($attributeInstance, $class)) {
+                return true;
+            }
+
+            if (is_subclass_of($attributeInstance, $class)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
