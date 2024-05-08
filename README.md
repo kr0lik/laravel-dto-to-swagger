@@ -24,7 +24,7 @@ $ php artisan vendor:publish --provider="Kr0lik\DtoToSwagger\DtoToSwaggerService
 ```
 $ php artisan swagger:generate
 ```
-This command will generate a swagger.yaml file with the Swagger documentation.
+This command will generate a swagger.yaml file according with the Swagger documentation.
 
 ## Example
 
