@@ -2,6 +2,8 @@
 
 Auto generation swagger from Laravel routing and strongly typed data for routes (Use DTO for request and response data).
 
+*You can use laravel-dto-to-swagger togather with spatie/laravel-data packege and swagger will be fully automated and very simple.
+
 ## Install
 ```
 $ composer require kr0lik/laravel-dto-to-swagger
