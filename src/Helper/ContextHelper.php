@@ -71,7 +71,11 @@ class ContextHelper
             if ($attributeInstance instanceof DateFormat) {
                 $format = $attributeInstance->parameters()[0] ?? '';
 
-                if ('' !== $format) {
+                if (is_array($format)) {
+                    $format = current($format);
+                }
+
+                if (is_string($format) && '' !== $format) {
                     $context = new Context(format: $context->format, pattern: self::phpToSwaggerDateTimeFormat($format));
                 }
             }
