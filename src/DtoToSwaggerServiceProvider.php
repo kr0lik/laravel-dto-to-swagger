@@ -8,6 +8,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Kr0lik\DtoToSwagger\Command\SwaggerGenerator;
+use Kr0lik\DtoToSwagger\OperationDescriber\Describers\DescriptionDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\HeaderParameterDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\PathParameterDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\QueryParameterDescriber;
@@ -227,6 +228,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
 
         $this->app->bind(OperationDescriberInterface::class, static function (): array {
             return [
+                DescriptionDescriber::class,
                 TagDescriber::class,
                 SecurityDescriber::class,
                 PathParameterDescriber::class,
