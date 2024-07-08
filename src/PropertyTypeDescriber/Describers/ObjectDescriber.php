@@ -135,6 +135,24 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
                 $schema->required[] = NameHelper::getName($reflectionProperty);
             }
+
+            if ($reflectionProperty->hasDefaultValue()) {
+                $schema->default = $reflectionProperty->getDefaultValue();
+            }
+
+            foreach ($reflectionClass->getConstructor()->getParameters() as $reflectionParameter) {
+                if ($reflectionParameter->getName() === $reflectionProperty->getName() && $reflectionParameter->isDefaultValueAvailable()) {
+                    $defaultValue = $reflectionParameter->getDefaultValue();
+
+                    if (is_a($defaultValue, BackedEnum::class, true)) {
+                        $defaultValue = $defaultValue->value;
+                    }
+
+                    if (is_scalar($defaultValue)) {
+                        $propertySchema->default = $defaultValue;
+                    }
+                }
+            }
         }
     }
 
