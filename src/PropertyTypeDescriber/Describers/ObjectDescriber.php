@@ -136,21 +136,15 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
                 $schema->required[] = NameHelper::getName($reflectionProperty);
             }
 
-            if ($reflectionProperty->hasDefaultValue()) {
-                $schema->default = $reflectionProperty->getDefaultValue();
-            }
+            $defaultValue = $this->getDefaultValue($reflectionProperty);
 
-            foreach ($reflectionClass->getConstructor()->getParameters() as $reflectionParameter) {
-                if ($reflectionParameter->getName() === $reflectionProperty->getName() && $reflectionParameter->isDefaultValueAvailable()) {
-                    $defaultValue = $reflectionParameter->getDefaultValue();
+            if ($defaultValue !== null) {
+                if (is_a($defaultValue, BackedEnum::class, true)) {
+                    $defaultValue = $defaultValue->value;
+                }
 
-                    if (is_a($defaultValue, BackedEnum::class, true)) {
-                        $defaultValue = $defaultValue->value;
-                    }
-
-                    if (is_scalar($defaultValue)) {
-                        $propertySchema->default = $defaultValue;
-                    }
+                if (is_scalar($defaultValue)) {
+                    $propertySchema->default = $defaultValue;
                 }
             }
         }
@@ -203,6 +197,21 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
         }
 
         return true;
+    }
+
+    private function getDefaultValue(ReflectionProperty $reflectionProperty): mixed
+    {
+        if ($reflectionProperty->hasDefaultValue()) {
+            return $reflectionProperty->getDefaultValue();
+        }
+
+        foreach ($reflectionProperty->getDeclaringClass()->getConstructor()?->getParameters() ?? [] as $constructorParameter) {
+            if ($constructorParameter->getName() === $reflectionProperty->getName() && $constructorParameter->isDefaultValueAvailable()) {
+                return $constructorParameter->getDefaultValue();
+            }
+        }
+
+        return null;
     }
 
     /**

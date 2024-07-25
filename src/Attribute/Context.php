@@ -10,9 +10,13 @@ use JsonSerializable;
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class Context implements JsonSerializable
 {
+    /**
+     * @param string[]|null $enum
+     */
     public function __construct(
         readonly ?string $format = null,
         readonly ?string $pattern = null,
+        readonly ?array $enum = null,
     ) {}
 
     /**

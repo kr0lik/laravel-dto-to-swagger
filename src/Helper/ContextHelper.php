@@ -8,6 +8,7 @@ use Kr0lik\DtoToSwagger\Attribute\Context;
 use ReflectionAttribute;
 use ReflectionProperty;
 use Spatie\LaravelData\Attributes\Validation\DateFormat;
+use Spatie\LaravelData\Attributes\Validation\In;
 use Spatie\LaravelData\Attributes\WithTransformer;
 use Spatie\LaravelData\Transformers\DateTimeInterfaceTransformer;
 
@@ -39,6 +40,7 @@ class ContextHelper
     {
         self::fillFromDateTimeValidation($attribute, $context);
         self::fillFromDateTimeTransformer($attribute, $context);
+        self::fillInValidation($attribute, $context);
     }
 
     private static function fillFromDateTimeTransformer(ReflectionAttribute $attribute, Context &$context): void
@@ -85,5 +87,21 @@ class ContextHelper
     private static function phpToSwaggerDateTimeFormat(string $format): string
     {
         return str_replace(['Y', 'm', 'd', 'H', 'i', 's', 'P'], ['YYYY', 'MM', 'DD', 'HH', 'mm', 'ss', 'Z'], $format);
+    }
+
+    private static function fillInValidation(ReflectionAttribute $attribute, Context &$context): void
+    {
+        if (class_exists(In::class)) {
+            $attributeInstance = $attribute->newInstance();
+
+            if ($attributeInstance instanceof In) {
+                // in:"wallet","-wallet","amount","-amount","status","-status","createdAt","-createdAt"
+                $format = (string) $attributeInstance;
+
+                $values = explode(',', str_replace(['in:', '"'], '', $format));
+
+                $context = new Context(enum: $values);
+            }
+        }
     }
 }
