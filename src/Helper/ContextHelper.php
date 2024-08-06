@@ -100,7 +100,7 @@ class ContextHelper
 
         $pattern = str_replace(array_keys($replacements), array_values($replacements), $format);
 
-        return '/^' . $pattern . '$/';
+        return '^' . $pattern . '$';
     }
 
     private static function fillInValidation(ReflectionAttribute $attribute, Context &$context): void
