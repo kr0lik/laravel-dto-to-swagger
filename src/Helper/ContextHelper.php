@@ -95,12 +95,12 @@ class ContextHelper
             'H' => '[0-9]{2}',  // Hour
             'i' => '[0-9]{2}',  // Minute
             's' => '[0-9]{2}',  // Second
-            'P' => '[+-][0-9]{2}:[0-9]{2}' // Timezone
+            'P' => '[+-][0-9]{2}:[0-9]{2}', // Timezone
         ];
 
         $pattern = str_replace(array_keys($replacements), array_values($replacements), $format);
 
-        return '^' . $pattern . '$';
+        return '^'.$pattern.'$';
     }
 
     private static function fillInValidation(ReflectionAttribute $attribute, Context &$context): void
