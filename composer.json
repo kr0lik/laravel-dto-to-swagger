@@ -13,7 +13,13 @@
     "php": "^8.2",
     "laravel/framework": "^10.0|^11.0",
     "phpdocumentor/reflection-docblock": "^5.3",
+    "symfony/property-info": "^7.1",
     "zircote/swagger-php": "^4.8"
+  },
+  "require-dev": {
+    "icanhazstring/composer-unused": "^0.8.11",
+    "kr0lik/php-cs-fixer": "^2.0",
+    "kr0lik/phpstan-rules": "^2.0"
   },
   "autoload": {
     "psr-4": {
@@ -31,11 +37,6 @@
         "Kr0lik\\DtoToSwagger\\DtoToSwaggerServiceProvider"
       ]
     }
-  },
-  "require-dev": {
-    "icanhazstring/composer-unused": "^0.8.11",
-    "kr0lik/php-cs-fixer": "^2.0",
-    "kr0lik/phpstan-rules": "^2.0"
   },
   "suggest": {
     "spatie/laravel-data": "^3.11"

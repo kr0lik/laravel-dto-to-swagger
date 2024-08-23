@@ -138,7 +138,7 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
             $defaultValue = $this->getDefaultValue($reflectionProperty);
 
-            if ($defaultValue !== null) {
+            if (null !== $defaultValue) {
                 if (is_a($defaultValue, BackedEnum::class, true)) {
                     $defaultValue = $defaultValue->value;
                 }
