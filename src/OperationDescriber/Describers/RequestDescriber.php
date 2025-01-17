@@ -24,7 +24,6 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
-use ReflectionProperty;
 use Symfony\Component\PropertyInfo\Type;
 
 class RequestDescriber implements OperationDescriberInterface

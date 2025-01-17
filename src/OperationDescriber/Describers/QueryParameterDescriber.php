@@ -26,7 +26,6 @@ use ReflectionProperty;
 
 class QueryParameterDescriber implements OperationDescriberInterface
 {
-
     use IsRequiredTrait;
 
     public const IN = 'query';

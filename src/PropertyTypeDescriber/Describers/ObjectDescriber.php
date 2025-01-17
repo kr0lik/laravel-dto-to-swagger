@@ -86,6 +86,8 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
     /**
      * @param array<string, mixed> $context
+     *
+     * @throws ReflectionException
      */
     private function getSchema(ReflectionClass $reflectionClass, array $context): ?Schema
     {
@@ -105,6 +107,8 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
     /**
      * @param array<string, mixed> $context
+     *
+     * @throws ReflectionException
      */
     private function fillProperties(Schema $schema, ReflectionClass $reflectionClass, array $context): void
     {
@@ -142,7 +146,7 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
             $defaultValue = $this->getDefaultValue($reflectionProperty);
 
             if (null !== $defaultValue) {
-                if (is_a($defaultValue, BackedEnum::class, true)) {
+                if (is_object($defaultValue) && is_a($defaultValue, BackedEnum::class, true)) {
                     $defaultValue = $defaultValue->value;
                 }
 
@@ -187,6 +191,9 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
         return $propertySchema;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     private function getDefaultValue(ReflectionProperty $reflectionProperty): mixed
     {
         if ($reflectionProperty->hasDefaultValue()) {

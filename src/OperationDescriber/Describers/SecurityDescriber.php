@@ -6,9 +6,11 @@ namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
 use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Attribute\Security;
+use Kr0lik\DtoToSwagger\Helper\AttributeHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use OpenApi\Annotations\Operation;
+use ReflectionException;
 use ReflectionMethod;
 
 class SecurityDescriber implements OperationDescriberInterface
@@ -19,6 +21,7 @@ class SecurityDescriber implements OperationDescriberInterface
      * @param array<string, mixed> $context
      *
      * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
     {
@@ -35,10 +38,11 @@ class SecurityDescriber implements OperationDescriberInterface
 
     /**
      * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     private function addFromAttributes(Operation $operation, ReflectionMethod $reflectionMethod): void
     {
-        foreach ($reflectionMethod->getAttributes() as $attribute) {
+        foreach (AttributeHelper::getAttributes($reflectionMethod) as $attribute) {
             $instance = $attribute->newInstance();
 
             if ($instance instanceof Security) {

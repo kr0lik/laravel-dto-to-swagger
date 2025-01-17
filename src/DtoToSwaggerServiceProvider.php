@@ -184,6 +184,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
         $this->app->singleton(PhpDocReader::class, static function (Application $app): PhpDocReader {
             /** @var DocTypePreparer $docTypePreparer */
             $docTypePreparer = $app->make(DocTypePreparer::class);
+            /** @var DocBlockFactory $docBlockFactory */
             $docBlockFactory = DocBlockFactory::createInstance();
 
             return new PhpDocReader(
