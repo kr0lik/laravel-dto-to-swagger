@@ -15,6 +15,7 @@ use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\PhpDocReader;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
 use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
+use Kr0lik\DtoToSwagger\Trait\IsRequiredTrait;
 use OpenApi\Annotations\Schema;
 use OpenApi\Attributes\Property;
 use OpenApi\Generator;
@@ -28,6 +29,8 @@ use Symfony\Component\PropertyInfo\Type;
 
 class ObjectDescriber implements PropertyTypeDescriberInterface
 {
+    use IsRequiredTrait;
+
     public const SKIP_TYPES_CONTEXT = 'object_type_describer_skip_types';
     public const SKIP_ATTRIBUTES_CONTEXT = 'object_type_describer_skip_attributes';
 
@@ -83,6 +86,8 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
     /**
      * @param array<string, mixed> $context
+     *
+     * @throws ReflectionException
      */
     private function getSchema(ReflectionClass $reflectionClass, array $context): ?Schema
     {
@@ -102,6 +107,8 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
     /**
      * @param array<string, mixed> $context
+     *
+     * @throws ReflectionException
      */
     private function fillProperties(Schema $schema, ReflectionClass $reflectionClass, array $context): void
     {
@@ -139,7 +146,7 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
             $defaultValue = $this->getDefaultValue($reflectionProperty);
 
             if (null !== $defaultValue) {
-                if (is_a($defaultValue, BackedEnum::class, true)) {
+                if (is_object($defaultValue) && is_a($defaultValue, BackedEnum::class, true)) {
                     $defaultValue = $defaultValue->value;
                 }
 
@@ -184,21 +191,9 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
         return $propertySchema;
     }
 
-    private function isRequired(ReflectionProperty $reflectionProperty): bool
-    {
-        if ($reflectionProperty->hasDefaultValue()) {
-            return false;
-        }
-
-        foreach ($reflectionProperty->getDeclaringClass()->getConstructor()?->getParameters() ?? [] as $constructorParameter) {
-            if ($constructorParameter->getName() === $reflectionProperty->getName() && $constructorParameter->isDefaultValueAvailable()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
+    /**
+     * @throws ReflectionException
+     */
     private function getDefaultValue(ReflectionProperty $reflectionProperty): mixed
     {
         if ($reflectionProperty->hasDefaultValue()) {

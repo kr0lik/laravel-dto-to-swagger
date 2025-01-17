@@ -14,6 +14,7 @@ use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\PhpDocReader;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
+use Kr0lik\DtoToSwagger\Trait\IsRequiredTrait;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\Parameter;
 use OpenApi\Annotations\Schema;
@@ -25,7 +26,9 @@ use ReflectionProperty;
 
 class QueryParameterDescriber implements OperationDescriberInterface
 {
-    private const IN = 'query';
+    use IsRequiredTrait;
+
+    public const IN = 'query';
 
     public function __construct(
         private ReflectionPreparer $reflectionPreparer,
@@ -142,20 +145,5 @@ class QueryParameterDescriber implements OperationDescriberInterface
         }
 
         return false;
-    }
-
-    private function isRequired(ReflectionProperty $reflectionProperty): bool
-    {
-        if ($reflectionProperty->hasDefaultValue()) {
-            return false;
-        }
-
-        foreach ($reflectionProperty->getDeclaringClass()->getConstructor()?->getParameters() ?? [] as $constructorParameter) {
-            if ($constructorParameter->getName() === $reflectionProperty->getName() && $constructorParameter->isDefaultValueAvailable()) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

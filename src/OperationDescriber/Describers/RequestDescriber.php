@@ -14,6 +14,7 @@ use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\ObjectDescriber;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
+use Kr0lik\DtoToSwagger\Trait\IsRequiredTrait;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\RequestBody;
 use OpenApi\Annotations\Schema;
@@ -27,6 +28,8 @@ use Symfony\Component\PropertyInfo\Type;
 
 class RequestDescriber implements OperationDescriberInterface
 {
+    use IsRequiredTrait;
+
     /**
      * @param array<int, array<string, mixed>> $requestErrorResponseSchemas
      */
@@ -118,6 +121,14 @@ class RequestDescriber implements OperationDescriberInterface
 
                     if (Generator::UNDEFINED === $name || null === $name || '' === $name) {
                         $name = NameHelper::getName($reflectionProperty);
+                    }
+
+                    if (Generator::UNDEFINED === $attributeInstance->in || null === $attributeInstance->in || '' === $attributeInstance->in) {
+                        $attributeInstance->in = QueryParameterDescriber::IN;
+                    }
+
+                    if ($this->isRequired($reflectionProperty)) {
+                        $attributeInstance->required = true;
                     }
 
                     $newParameter = Util::getOperationParameter($operation, $name, $attributeInstance->in);

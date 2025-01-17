@@ -10,6 +10,7 @@ use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
+use Kr0lik\DtoToSwagger\Trait\IsRequiredTrait;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\Parameter;
 use OpenApi\Annotations\Schema;
@@ -17,6 +18,9 @@ use ReflectionMethod;
 
 class PathParameterDescriber implements OperationDescriberInterface
 {
+    use IsRequiredTrait;
+
+    public const IN = 'path';
     public const IN_PATH_PARAMETERS_CONTEXT = 'inPathParameters';
 
     public function __construct(
@@ -45,7 +49,7 @@ class PathParameterDescriber implements OperationDescriberInterface
 
             $this->propertyDescriber->describe($schema, $currentPropertyContext->jsonSerialize(), ...$types);
 
-            $parameter = Util::getOperationParameter($operation, $name, 'path');
+            $parameter = Util::getOperationParameter($operation, $name, self::IN);
 
             Util::merge($parameter, [
                 'required' => true,
@@ -62,7 +66,7 @@ class PathParameterDescriber implements OperationDescriberInterface
         foreach ($reflectionMethod->getAttributes() as $attribute) {
             $attributeInstance = $attribute->newInstance();
 
-            if ($attributeInstance instanceof Parameter && 'path' === $attributeInstance->in) {
+            if ($attributeInstance instanceof Parameter && self::IN === $attributeInstance->in) {
                 $newParameter = Util::getOperationParameter($operation, $attributeInstance->name, $attributeInstance->in);
                 Util::merge($newParameter, $attributeInstance);
             }
