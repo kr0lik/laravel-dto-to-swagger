@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Kr0lik\DtoToSwagger\Helper;
 
-use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
@@ -21,7 +20,7 @@ class AttributeHelper
     {
         $reflectionClass = new ReflectionClass($reflectionMethod->class);
 
-        foreach (ClassHelper::getAttributesRecursively($reflectionClass) as $attribute) {
+        foreach ($reflectionClass->getAttributes() as $attribute) {
             yield $attribute;
         }
 
