@@ -75,21 +75,30 @@ class QueryParameterDescriber implements OperationDescriberInterface
     /**
      * @throws InvalidArgumentException
      */
-    private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass): void
+    private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass, array $nestedNames = []): void
     {
         foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
             $isNested = $this->isNested($reflectionProperty);
+            $nestedNames[] = $reflectionProperty->getName();
 
             if ($isNested === true) {
-                $this->addQueryParametersFromObject($operation, new ReflectionClass($reflectionProperty->getType()->getName()));
+                $nestedReflectionClassName = $reflectionProperty->getType()->getName();
+                $nestedReflectionClass = new ReflectionClass($nestedReflectionClassName);
+
+                $this->addQueryParametersFromObject($operation, $nestedReflectionClass, $nestedNames);
+
                 continue;
             }
 
             $parameter = $this->getParameter($operation, $reflectionProperty);
+            
+            array_pop($nestedNames);
+            $nestedNames[] = $parameter->name;
 
             Util::merge($parameter, [
                 'required' => $this->isRequired($reflectionProperty),
                 'schema' => $this->getSchema($reflectionProperty),
+                'name' => $nestedNames !== [] ? $this->buildName($nestedNames) : $parameter->name,
             ], true);
 
             if ($this->isDeprecated($reflectionProperty)) {
@@ -115,6 +124,17 @@ class QueryParameterDescriber implements OperationDescriberInterface
         }
 
         return $isNested;
+    }
+
+    private function buildName(array $names): string
+    {
+        $result = array_shift($names);
+
+        foreach ($names as $name) {
+            $result .= "[$name]";
+        }
+
+        return $result;
     }
 
     /**
