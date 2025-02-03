@@ -79,7 +79,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
     {
         foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
             $isNested = $this->isNested($reflectionProperty);
-            $nestedNames[] = $reflectionProperty->getName();
+            $nestedNames[] = NameHelper::getName($reflectionProperty);
 
             if ($isNested === true) {
                 $nestedReflectionClassName = $reflectionProperty->getType()->getName();
@@ -91,9 +91,6 @@ class QueryParameterDescriber implements OperationDescriberInterface
             }
 
             $parameter = $this->getParameter($operation, $reflectionProperty);
-            
-            array_pop($nestedNames);
-            $nestedNames[] = $parameter->name;
 
             Util::merge($parameter, [
                 'required' => $this->isRequired($reflectionProperty),
