@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
 use InvalidArgumentException;
+use Kr0lik\DtoToSwagger\Attribute\Nested;
 use Kr0lik\DtoToSwagger\Contract\QueryRequestInterface;
 use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\NameHelper;
@@ -23,6 +24,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionProperty;
+use Symfony\Component\TypeInfo\Type\BuiltinType;
 
 class QueryParameterDescriber implements OperationDescriberInterface
 {
@@ -76,6 +78,13 @@ class QueryParameterDescriber implements OperationDescriberInterface
     private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass): void
     {
         foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
+            $isNested = $this->isNested($reflectionProperty);
+
+            if ($isNested === true) {
+                $this->addQueryParametersFromObject($operation, new ReflectionClass($reflectionProperty->getType()->getName()));
+                continue;
+            }
+
             $parameter = $this->getParameter($operation, $reflectionProperty);
 
             Util::merge($parameter, [
@@ -87,6 +96,25 @@ class QueryParameterDescriber implements OperationDescriberInterface
                 $parameter->deprecated = true;
             }
         }
+    }
+
+    private function isNested(ReflectionProperty $reflectionProperty): bool
+    {
+        $isNested = false;
+        $isBuiltin = $reflectionProperty->getType()->isBuiltin();
+
+        if ($isBuiltin === false) {
+            $attributes = $reflectionProperty->getAttributes(Nested::class);
+
+            foreach ($attributes as $attribute) {
+                if ($attribute->getName() === Nested::class) {
+                    $isNested = true;
+                    break;
+                }
+            }
+        }
+
+        return $isNested;
     }
 
     /**
