@@ -24,7 +24,6 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionProperty;
-use Symfony\Component\TypeInfo\Type\BuiltinType;
 
 class QueryParameterDescriber implements OperationDescriberInterface
 {
