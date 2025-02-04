@@ -104,13 +104,14 @@ class HeaderParameterDescriber implements OperationDescriberInterface
                     $name = NameHelper::getName($reflectionProperty);
                 }
 
-                $in = $attributeInstance->in;
-
-                if (Generator::UNDEFINED === $in || null === $in || '' === $in) {
-                    $in = self::IN;
+                if (Generator::UNDEFINED === $attributeInstance->in || null === $attributeInstance->in || '' === $attributeInstance->in) {
+                    $attributeInstance->in = self::IN;
                 }
 
-                return Util::getOperationParameter($operation, $name, $in);
+                $newParameter = Util::getOperationParameter($operation, $name, $attributeInstance->in);
+                Util::merge($newParameter, $attributeInstance);
+
+                return $newParameter;
             }
         }
 

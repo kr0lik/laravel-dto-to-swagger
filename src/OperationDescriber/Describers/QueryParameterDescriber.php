@@ -23,6 +23,7 @@ use OpenApi\Generator;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use ReflectionNamedType;
 use ReflectionProperty;
 
 class QueryParameterDescriber implements OperationDescriberInterface
@@ -72,19 +73,25 @@ class QueryParameterDescriber implements OperationDescriberInterface
     }
 
     /**
+     * @param string[] $nestedNames
+     *
      * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass, array $nestedNames = []): void
     {
         foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
-            $isNested = $this->isNested($reflectionProperty);
+            // @TODO: fix it - move getting nested to private method
             $nestedNames[] = NameHelper::getName($reflectionProperty);
 
-            if ($isNested === true) {
+            if ($this->isNested($reflectionProperty)) {
+                /** @phpstan-ignore-next-line */
                 $nestedReflectionClassName = $reflectionProperty->getType()->getName();
                 $nestedReflectionClass = new ReflectionClass($nestedReflectionClassName);
 
                 $this->addQueryParametersFromObject($operation, $nestedReflectionClass, $nestedNames);
+
+                $nestedNames = [];
 
                 continue;
             }
@@ -94,40 +101,43 @@ class QueryParameterDescriber implements OperationDescriberInterface
             Util::merge($parameter, [
                 'required' => $this->isRequired($reflectionProperty),
                 'schema' => $this->getSchema($reflectionProperty),
-                'name' => $nestedNames !== [] ? $this->buildName($nestedNames) : $parameter->name,
+                'name' => $this->buildName($nestedNames),
             ], true);
 
             if ($this->isDeprecated($reflectionProperty)) {
                 $parameter->deprecated = true;
             }
+
+            $nestedNames = [];
         }
     }
 
     private function isNested(ReflectionProperty $reflectionProperty): bool
     {
-        $isNested = false;
-        $isBuiltin = $reflectionProperty->getType()->isBuiltin();
+        if (!$reflectionProperty->getType() instanceof ReflectionNamedType || $reflectionProperty->getType()->isBuiltin()) {
+            return false;
+        }
 
-        if ($isBuiltin === false) {
-            $attributes = $reflectionProperty->getAttributes(Nested::class);
+        $attributes = $reflectionProperty->getAttributes(Nested::class);
 
-            foreach ($attributes as $attribute) {
-                if ($attribute->getName() === Nested::class) {
-                    $isNested = true;
-                    break;
-                }
+        foreach ($attributes as $attribute) {
+            if (Nested::class === $attribute->getName()) {
+                return true;
             }
         }
 
-        return $isNested;
+        return false;
     }
 
+    /**
+     * @param string[] $names
+     */
     private function buildName(array $names): string
     {
         $result = array_shift($names);
 
         foreach ($names as $name) {
-            $result .= "[$name]";
+            $result .= "[{$name}]";
         }
 
         return $result;
@@ -148,13 +158,14 @@ class QueryParameterDescriber implements OperationDescriberInterface
                     $name = NameHelper::getName($reflectionProperty);
                 }
 
-                $in = $attributeInstance->in;
-
-                if (Generator::UNDEFINED === $in || null === $in || '' === $in) {
-                    $in = self::IN;
+                if (Generator::UNDEFINED === $attributeInstance->in || null === $attributeInstance->in || '' === $attributeInstance->in) {
+                    $attributeInstance->in = self::IN;
                 }
 
-                return Util::getOperationParameter($operation, $name, $in);
+                $newParameter = Util::getOperationParameter($operation, $name, $attributeInstance->in);
+                Util::merge($newParameter, $attributeInstance);
+
+                return $newParameter;
             }
         }
 
