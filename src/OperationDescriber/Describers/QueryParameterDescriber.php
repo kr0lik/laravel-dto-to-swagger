@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
 use InvalidArgumentException;
+use Kr0lik\DtoToSwagger\Attribute\Nested;
 use Kr0lik\DtoToSwagger\Contract\QueryRequestInterface;
 use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\NameHelper;
@@ -73,20 +74,63 @@ class QueryParameterDescriber implements OperationDescriberInterface
     /**
      * @throws InvalidArgumentException
      */
-    private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass): void
+    private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass, array $nestedNames = []): void
     {
         foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
+            $isNested = $this->isNested($reflectionProperty);
+            $nestedNames[] = NameHelper::getName($reflectionProperty);
+
+            if ($isNested === true) {
+                $nestedReflectionClassName = $reflectionProperty->getType()->getName();
+                $nestedReflectionClass = new ReflectionClass($nestedReflectionClassName);
+
+                $this->addQueryParametersFromObject($operation, $nestedReflectionClass, $nestedNames);
+
+                continue;
+            }
+
             $parameter = $this->getParameter($operation, $reflectionProperty);
 
             Util::merge($parameter, [
                 'required' => $this->isRequired($reflectionProperty),
                 'schema' => $this->getSchema($reflectionProperty),
+                'name' => $nestedNames !== [] ? $this->buildName($nestedNames) : $parameter->name,
             ], true);
 
             if ($this->isDeprecated($reflectionProperty)) {
                 $parameter->deprecated = true;
             }
         }
+    }
+
+    private function isNested(ReflectionProperty $reflectionProperty): bool
+    {
+        $isNested = false;
+        $isBuiltin = $reflectionProperty->getType()->isBuiltin();
+
+        if ($isBuiltin === false) {
+            $attributes = $reflectionProperty->getAttributes(Nested::class);
+
+            foreach ($attributes as $attribute) {
+                if ($attribute->getName() === Nested::class) {
+                    $isNested = true;
+                    break;
+                }
+            }
+        }
+
+        return $isNested;
+    }
+
+    private function buildName(array $names): string
+    {
+        $result = array_shift($names);
+
+        foreach ($names as $name) {
+            $result .= "[$name]";
+        }
+
+        return $result;
     }
 
     /**

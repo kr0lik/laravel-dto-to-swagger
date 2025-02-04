@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dto\Request;
 
+use Kr0lik\DtoToSwagger\Attribute\Nested;
 use Kr0lik\DtoToSwagger\Contract\QueryRequestInterface;
 use OpenApi\Attributes\Parameter;
 
@@ -13,6 +14,9 @@ class QueryRequest implements QueryRequestInterface
         readonly int $page,
         #[Parameter(name: 'per-page')]
         readonly int $perPage = 20,
+
+        #[Nested]
+        readonly SortDto $sort,
     ) {
     }
 }
