@@ -29,3 +29,13 @@ This command will generate a swagger.yaml file according with the Swagger docume
 ## Example
 
 See example folder
+
+
+## Develop
+docker pull composer:2.2.20
+
+docker run -v .:/app --rm composer:2.2.20 composer install
+
+docker run -v .:/app --rm composer:2.2.20 bin/php-cs-fixer fix
+
+docker run -v .:/app --rm composer:2.2.20 bin/phpstan analyse

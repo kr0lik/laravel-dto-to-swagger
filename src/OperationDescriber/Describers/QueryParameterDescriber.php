@@ -73,25 +73,14 @@ class QueryParameterDescriber implements OperationDescriberInterface
     }
 
     /**
-     * @param string[] $nestedNames
-     *
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass, array $nestedNames = []): void
+    private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass): void
     {
         foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
-            // @TODO: fix it - move getting nested to private method
-            $nestedNames[] = NameHelper::getName($reflectionProperty);
-
             if ($this->isNested($reflectionProperty)) {
-                /** @phpstan-ignore-next-line */
-                $nestedReflectionClassName = $reflectionProperty->getType()->getName();
-                $nestedReflectionClass = new ReflectionClass($nestedReflectionClassName);
-
-                $this->addQueryParametersFromObject($operation, $nestedReflectionClass, $nestedNames);
-
-                $nestedNames = [];
+                $this->addNestedParameters($operation, $reflectionProperty);
 
                 continue;
             }
@@ -101,14 +90,50 @@ class QueryParameterDescriber implements OperationDescriberInterface
             Util::merge($parameter, [
                 'required' => $this->isRequired($reflectionProperty),
                 'schema' => $this->getSchema($reflectionProperty),
-                'name' => $this->buildName($nestedNames),
+            ], true);
+
+            if ($this->isDeprecated($reflectionProperty)) {
+                $parameter->deprecated = true;
+            }
+        }
+    }
+
+    /**
+     * @param string[] $nestedNames
+     *
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     */
+    private function addNestedParameters(Operation $operation, ReflectionProperty $nestedReflectionProperty, array $nestedNames = []): void
+    {
+        $nestedNames[] = $this->getName($nestedReflectionProperty);
+
+        /** @phpstan-ignore-next-line */
+        $nestedReflectionClassName = $nestedReflectionProperty->getType()->getName();
+        $nestedReflectionClass = new ReflectionClass($nestedReflectionClassName);
+
+        foreach (ClassHelper::getVisiblePropertiesRecursively($nestedReflectionClass) as $reflectionProperty) {
+            if ($this->isNested($reflectionProperty)) {
+                $this->addNestedParameters($operation, $reflectionProperty, $nestedNames);
+
+                continue;
+            }
+
+            $parameter = $this->getParameter($operation, $reflectionProperty);
+
+            Util::merge($parameter, [
+                'required' => $this->isRequired($reflectionProperty),
+                'schema' => $this->getSchema($reflectionProperty),
+                'name' => $this->buildNestedName(array_merge($nestedNames, [$parameter->name])),
             ], true);
 
             if ($this->isDeprecated($reflectionProperty)) {
                 $parameter->deprecated = true;
             }
 
-            $nestedNames = [];
+            if ($this->isDeprecated($nestedReflectionProperty)) {
+                $parameter->deprecated = true;
+            }
         }
     }
 
@@ -129,14 +154,31 @@ class QueryParameterDescriber implements OperationDescriberInterface
         return false;
     }
 
-    /**
-     * @param string[] $names
-     */
-    private function buildName(array $names): string
+    private function getName(ReflectionProperty $reflectionProperty): string
     {
-        $result = array_shift($names);
+        foreach ($reflectionProperty->getAttributes() as $attribute) {
+            $attributeInstance = $attribute->newInstance();
 
-        foreach ($names as $name) {
+            if ($attributeInstance instanceof Parameter) {
+                $name = $attributeInstance->name;
+
+                if (Generator::UNDEFINED !== $name && null !== $name && '' !== $name) {
+                    return $name;
+                }
+            }
+        }
+
+        return NameHelper::getName($reflectionProperty);
+    }
+
+    /**
+     * @param string[] $nestedNames
+     */
+    private function buildNestedName(array $nestedNames): string
+    {
+        $result = array_shift($nestedNames);
+
+        foreach ($nestedNames as $name) {
             $result .= "[{$name}]";
         }
 
