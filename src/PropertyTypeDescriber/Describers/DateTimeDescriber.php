@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriberInterface;
 use OpenApi\Annotations\Schema;
+use OpenApi\Generator;
 use Symfony\Component\PropertyInfo\Type;
 
 class DateTimeDescriber implements PropertyTypeDescriberInterface
@@ -21,7 +22,10 @@ class DateTimeDescriber implements PropertyTypeDescriberInterface
     public function describe(Schema $property, array $context = [], Type ...$types): void
     {
         $property->type = 'string';
-        $property->format = 'date-time';
+
+        if (null === $property->format || Generator::UNDEFINED === $property->format) {
+            $property->format = 'date-time';
+        }
 
         Util::merge($property, $context, true);
     }
