@@ -13,8 +13,9 @@ return [
         'excludeMiddlewares' => [], // string[]
         'excludePatterns' => [], // string[]
         'middlewaresToAuth' => ['auth:sanctum' => ['bearerAuth' => []]], // array<string, array<string, array<mixed>>>
-        'tagFromControllerName' => true, // bool
-        'tagFromActionFolder' => true, // bool
+        'tagFromControllerName' => false, // bool
+        'tagFromControllerFolder' => false, // bool
+        'tagFromActionFolder' => false, // bool
         'tagFromMiddlewares' => ['api', 'admin', 'web'], // string[]
         'fileUploadType' => SymfonyUploadedFile::class,
         'defaultErrorResponseSchemas' => [

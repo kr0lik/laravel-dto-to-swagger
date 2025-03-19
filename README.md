@@ -44,7 +44,7 @@ The config file is located at `config/swagger.php`. You can define multiple conf
 - `includeMiddlewares`, `excludeMiddlewares`: Define which middlewares to include/exclude.
 - `includePatterns`, `excludePatterns`: Control route inclusion/exclusion patterns.
 - `middlewaresToAuth`: Define authentication middlewares (e.g., `auth:sanctum`).
-- `tagFromControllerName`, `tagFromActionFolder`, `tagFromMiddlewares`: Control Swagger tags generation.
+- `tagFromControllerName`, `tagFromControllerFolder`, `tagFromActionFolder`, `tagFromMiddlewares`: Control Swagger tags generation.
 - `fileUploadType`: Define the class used for file upload with `multipart/form-data` schema.
 - `defaultErrorResponseSchemas`, `requestErrorResponseSchemas`: Configure default error response schemas.
 - `openApi`: Base OpenAPI configuration, including:
@@ -73,6 +73,7 @@ return [
         'excludePatterns' => [], // string[]
         'middlewaresToAuth' => ['auth:sanctum' => ['bearerAuth' => []]], // array<string, array<string, array<mixed>>>
         'tagFromControllerName' => true, // bool
+        'tagFromControllerFolder' => false, // bool
         'tagFromActionFolder' => true, // bool
         'tagFromMiddlewares' => ['api', 'admin', 'web'], // string[]
         'fileUploadType' => SymfonyUploadedFile::class,
