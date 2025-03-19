@@ -8,7 +8,7 @@
 
 🚀 Integrates with [`spatie/laravel-data`](https://github.com/spatie/laravel-data), making Swagger generation seamless and fully automated.
 
-📌 **Use `declare(strict_types=1);`** to ensure strict type safety. The schema fully reflects your type definitions without manual intervention.
+📌 **The schema fully reflects your type definitions without manual intervention.
 
 🛠 **Based on `zircote/swagger-php`** for powerful OpenAPI support.
 
