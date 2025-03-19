@@ -84,7 +84,7 @@ class TagDescriber implements OperationDescriberInterface
 
         $pathParts = explode('/', str_replace('\\', '/', $reflectionMethod->getDeclaringClass()->getName()));
 
-        $name = $pathParts[count($pathParts) - 1];
+        $name = $pathParts[count($pathParts) - 2];
 
         Util::merge($operation, ['tags' => [$name]]);
     }
