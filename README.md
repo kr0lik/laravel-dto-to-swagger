@@ -150,7 +150,7 @@ If you want to generate using a specific configuration (for example, else-one), 
 php artisan swagger:generate else-one
 ```
 
-This generates a `else-one-swagger.yaml` file with fully automated API documentation.
+This generates a `swagger-else-one.yaml` file from config above.
 
 ---
 
