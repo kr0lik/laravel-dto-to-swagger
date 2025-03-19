@@ -29,7 +29,7 @@ Kr0lik\DtoToSwagger\DtoToSwaggerServiceProvider::class,
 Publish the configuration file:
 
 ```bash
-php artisan vendor:publish --provider="Kr0lik\DtoToSwagger\DtoToSwaggerServiceProvider"
+$ php artisan vendor:publish --tag=swagger-config
 ```
 
 ---

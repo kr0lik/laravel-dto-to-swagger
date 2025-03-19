@@ -65,8 +65,6 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom($this->configPath(), 'swagger');
-
         $this->registerOpenApiRegister();
         $this->registerPropertyExtractor();
         $this->registerReflectionTypePreparer();
@@ -87,12 +85,9 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
             $publishPath = base_path('config/swagger.php');
         }
 
-        $this->publishes([$this->configPath() => $publishPath], 'config/swagger');
-    }
-
-    private function configPath(): string
-    {
-        return __DIR__.'/../config/swagger.php';
+        $this->publishes([
+            __DIR__.'/../config/swagger.php' => $publishPath,
+        ], 'swagger-config');
     }
 
     private function registerOpenApiRegister(): void
@@ -285,7 +280,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
         $result = [];
 
         if ([] !== $defaultConfig) {
-            $result['default'] = $defaultConfig;
+            $result['default'] = ConfigDto::fromArray($defaultConfig);
         }
 
         if (array_key_exists('openApi', $swaggerConfigs)) {
@@ -293,7 +288,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
         }
 
         foreach ($swaggerConfigs as $configKey => $configValue) {
-            $result[$configKey] = array_merge($defaultConfig, $configValue);
+            $result[$configKey] = ConfigDto::fromArray(array_merge($defaultConfig, $configValue));
         }
 
         return $result;
