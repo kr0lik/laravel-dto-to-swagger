@@ -6,6 +6,7 @@ namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
 use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Contract\JsonRequestInterface;
+use Kr0lik\DtoToSwagger\Dto\RouteContextDto;
 use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\NameHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
@@ -14,6 +15,7 @@ use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\ObjectDescriber;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
+use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use Kr0lik\DtoToSwagger\Trait\IsRequiredTrait;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\RequestBody;
@@ -30,23 +32,17 @@ class RequestDescriber implements OperationDescriberInterface
 {
     use IsRequiredTrait;
 
-    /**
-     * @param array<int, array<string, mixed>> $requestErrorResponseSchemas
-     */
     public function __construct(
+        private OpenApiRegister $openApiRegister,
         private PropertyTypeDescriber $propertyDescriber,
         private ReflectionPreparer $reflectionPreparer,
-        private array $requestErrorResponseSchemas,
-        private ?string $fileUploadType,
     ) {}
 
     /**
-     * @param array<string, mixed> $context
-     *
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
+    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, RouteContextDto $routeContext): void
     {
         $this->addFromAttributes($operation, $reflectionMethod);
 
@@ -54,10 +50,11 @@ class RequestDescriber implements OperationDescriberInterface
             if (1 === count($types) && is_subclass_of($types[0]->getClassName(), JsonRequestInterface::class)) {
                 $jsonContent = new Schema([]);
 
+                $context = [];
                 $context[ObjectDescriber::SKIP_ATTRIBUTES_CONTEXT] = [Parameter::class];
 
-                if (null === $this->fileUploadType || '' === $this->fileUploadType) {
-                    $context[ObjectDescriber::SKIP_TYPES_CONTEXT] = [$this->fileUploadType];
+                if ('' === $this->openApiRegister->getConfig()->fileUploadType) {
+                    $context[ObjectDescriber::SKIP_TYPES_CONTEXT] = [$this->openApiRegister->getConfig()->fileUploadType];
                 }
 
                 $this->propertyDescriber->describe($jsonContent, $context, ...$types);
@@ -74,8 +71,8 @@ class RequestDescriber implements OperationDescriberInterface
                     ], true);
                 }
 
-                if ([] !== $this->requestErrorResponseSchemas) {
-                    Util::merge($operation, ['responses' => $this->requestErrorResponseSchemas]);
+                if ([] !== $this->openApiRegister->getConfig()->requestErrorResponseSchemas) {
+                    Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->requestErrorResponseSchemas]);
                 }
 
                 $this->searchAndDescribeParameters($operation, $types[0]);
@@ -180,7 +177,7 @@ class RequestDescriber implements OperationDescriberInterface
      */
     private function searchFIleUploadProperties(Type $type): array
     {
-        if (null === $this->fileUploadType || '' === $this->fileUploadType) {
+        if ('' === $this->openApiRegister->getConfig()->fileUploadType) {
             return [];
         }
 
@@ -198,8 +195,8 @@ class RequestDescriber implements OperationDescriberInterface
             if (
                 $reflectionProperty->getType() instanceof ReflectionNamedType
                 && (
-                    $reflectionProperty->getType()->getName() === $this->fileUploadType
-                    || is_subclass_of($reflectionProperty->getType()->getName(), $this->fileUploadType)
+                    $reflectionProperty->getType()->getName() === $this->openApiRegister->getConfig()->fileUploadType
+                    || is_subclass_of($reflectionProperty->getType()->getName(), $this->openApiRegister->getConfig()->fileUploadType)
                 )
             ) {
                 $name = NameHelper::getName($reflectionProperty);

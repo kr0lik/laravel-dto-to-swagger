@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kr0lik\DtoToSwagger\OperationDescriber;
 
 use InvalidArgumentException;
+use Kr0lik\DtoToSwagger\Dto\RouteContextDto;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use OpenApi\Annotations\Operation;
 use ReflectionMethod;
@@ -22,11 +23,9 @@ final class OperationDescriber
     }
 
     /**
-     * @param array<string, mixed> $context
-     *
      * @throws InvalidArgumentException
      */
-    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
+    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, RouteContextDto $context): void
     {
         foreach ($reflectionMethod->getAttributes() as $attribute) {
             $instanceAttribute = $attribute->newInstance();

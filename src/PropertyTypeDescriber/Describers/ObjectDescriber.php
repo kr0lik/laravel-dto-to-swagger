@@ -35,8 +35,8 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
     public const SKIP_ATTRIBUTES_CONTEXT = 'object_type_describer_skip_attributes';
 
     public function __construct(
+        private OpenApiRegister $openApiRegister,
         private PropertyTypeDescriber $propertyDescriber,
-        private OpenApiRegister $schemaRegister,
         private ReflectionPreparer $reflectionPreparer,
         private PhpDocReader $phpDocReader,
     ) {}
@@ -57,7 +57,7 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
             return;
         }
 
-        $path = $this->schemaRegister->findPath($class);
+        $path = $this->openApiRegister->findSchemaPath($class);
 
         if (null !== $path) {
             $property->ref = $path;
@@ -73,7 +73,7 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
             return;
         }
 
-        $property->ref = $this->schemaRegister->register($schema, $class);
+        $property->ref = $this->openApiRegister->registerSchema($schema, $class);
     }
 
     public function supports(Type ...$types): bool

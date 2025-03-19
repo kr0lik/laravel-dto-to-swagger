@@ -6,13 +6,10 @@ namespace Kr0lik\DtoToSwagger\Processor;
 
 use Illuminate\Routing\Route;
 use InvalidArgumentException;
-use Kr0lik\DtoToSwagger\Attribute\Context;
+use Kr0lik\DtoToSwagger\Dto\RouteContextDto;
 use Kr0lik\DtoToSwagger\Helper\Util;
-use Kr0lik\DtoToSwagger\OperationDescriber\Describers\PathParameterDescriber;
-use Kr0lik\DtoToSwagger\OperationDescriber\Describers\SecurityDescriber;
-use Kr0lik\DtoToSwagger\OperationDescriber\Describers\TagDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriber;
-use OpenApi\Annotations\OpenApi;
+use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use ReflectionException;
 use ReflectionMethod;
 
@@ -20,33 +17,29 @@ class RouteProcessor
 {
     private const SUPPORTED_METHODS = ['get', 'post', 'put', 'patch', 'delete'];
 
-    /**
-     * @param array<string, array<string, array<mixed>>> $middlewaresToAuth
-     * @param string[]                                   $tagFromMiddlewares
-     */
     public function __construct(
+        private OpenApiRegister $openApiRegister,
         private OperationDescriber $operationDescriber,
-        private array $middlewaresToAuth,
-        private array $tagFromMiddlewares,
     ) {}
 
     /**
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    public function process(OpenApi $openApi, Route $route): void
+    public function process(Route $route): void
     {
-        $pathItem = Util::getPath($openApi, $this->getPath($route));
+        $pathItem = Util::getPath($this->openApiRegister->getOpenApi(), $this->getPath($route));
 
         foreach ($route->methods() as $method) {
             if (!$this->isSupported($method)) {
                 continue;
             }
 
-            $context = [];
-            $context[PathParameterDescriber::IN_PATH_PARAMETERS_CONTEXT] = $this->getParameters($route);
-            $context[SecurityDescriber::DEFAULT_SECURITIES_CONTEXT] = $this->getSecurities($route);
-            $context[TagDescriber::DEFAULT_TAGS_CONTEXT] = $this->getTags($route);
+            $context = new RouteContextDto(
+                inPathParametersPerName: $this->getParametersPerName($route),
+                defaultSecurities: $this->getSecurities($route),
+                defaultTags: $this->getTags($route)
+            );
 
             $operation = Util::getOperation($pathItem, $method);
 
@@ -75,9 +68,9 @@ class RouteProcessor
     }
 
     /**
-     * @return array<string, Context>
+     * @return array<string, array<string, string>>
      */
-    private function getParameters(Route $route): array
+    private function getParametersPerName(Route $route): array
     {
         $parameterNames = [];
 
@@ -85,7 +78,7 @@ class RouteProcessor
         foreach ($route->parameterNames() as $parameterName) {
             $pattern = $route->wheres[$parameterName] ?? null;
 
-            $parameterNames[$parameterName] = new Context(pattern: $pattern);
+            $parameterNames[$parameterName] = ['pattern' => $pattern];
         }
 
         return $parameterNames;
@@ -99,8 +92,8 @@ class RouteProcessor
         $securities = [];
 
         foreach ((array) $route->middleware() as $middleware) {
-            if (array_key_exists($middleware, $this->middlewaresToAuth)) {
-                $securities[] = $this->middlewaresToAuth[$middleware];
+            if (array_key_exists($middleware, $this->openApiRegister->getConfig()->middlewaresToAuth)) {
+                $securities[] = $this->openApiRegister->getConfig()->middlewaresToAuth[$middleware];
             }
         }
 
@@ -115,7 +108,7 @@ class RouteProcessor
         $tags = [];
 
         foreach ((array) $route->middleware() as $middleware) {
-            if (in_array($middleware, $this->tagFromMiddlewares, true)) {
+            if (in_array($middleware, $this->openApiRegister->getConfig()->tagFromMiddlewares, true)) {
                 $tags[] = $middleware;
             }
         }

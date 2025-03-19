@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
 use InvalidArgumentException;
+use Kr0lik\DtoToSwagger\Dto\RouteContextDto;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\PhpDocReader;
 use OpenApi\Annotations\Operation;
@@ -17,11 +18,9 @@ class DescriptionDescriber implements OperationDescriberInterface
     ) {}
 
     /**
-     * @param array<string, mixed> $context
-     *
      * @throws InvalidArgumentException
      */
-    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
+    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, RouteContextDto $routeContext): void
     {
         $description = $this->phpDocReader->getDescription($reflectionMethod);
 

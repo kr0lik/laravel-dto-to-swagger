@@ -6,6 +6,7 @@ namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
 use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Attribute\Security;
+use Kr0lik\DtoToSwagger\Dto\RouteContextDto;
 use Kr0lik\DtoToSwagger\Helper\AttributeHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
@@ -15,24 +16,16 @@ use ReflectionMethod;
 
 class SecurityDescriber implements OperationDescriberInterface
 {
-    public const DEFAULT_SECURITIES_CONTEXT = 'default_securities';
-
     /**
-     * @param array<string, mixed> $context
-     *
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
+    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, RouteContextDto $routeContext): void
     {
         $this->addFromAttributes($operation, $reflectionMethod);
 
-        if (
-            array_key_exists(self::DEFAULT_SECURITIES_CONTEXT, $context)
-            && is_array($context[self::DEFAULT_SECURITIES_CONTEXT])
-            && [] !== $context[self::DEFAULT_SECURITIES_CONTEXT]
-        ) {
-            Util::merge($operation, ['security' => $context[self::DEFAULT_SECURITIES_CONTEXT]]);
+        if ([] !== $routeContext->defaultSecurities) {
+            Util::merge($operation, ['security' => $routeContext->defaultSecurities]);
         }
     }
 

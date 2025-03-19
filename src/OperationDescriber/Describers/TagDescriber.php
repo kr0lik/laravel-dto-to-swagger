@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
 use InvalidArgumentException;
+use Kr0lik\DtoToSwagger\Dto\RouteContextDto;
 use Kr0lik\DtoToSwagger\Helper\AttributeHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
+use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\Tag;
 use ReflectionException;
@@ -15,33 +17,24 @@ use ReflectionMethod;
 
 class TagDescriber implements OperationDescriberInterface
 {
-    public const DEFAULT_TAGS_CONTEXT = 'default_tags';
-
     public function __construct(
-        private bool $tagFromControllerName,
-        private bool $tagFromActionFolder,
+        private OpenApiRegister $openApiRegister,
     ) {}
 
     /**
-     * @param array<string, mixed> $context
-     *
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
+    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, RouteContextDto $routeContext): void
     {
         $this->addFromAttributes($operation, $reflectionMethod);
 
-        if (
-            array_key_exists(self::DEFAULT_TAGS_CONTEXT, $context)
-            && is_array($context[self::DEFAULT_TAGS_CONTEXT])
-            && [] !== $context[self::DEFAULT_TAGS_CONTEXT]
-        ) {
-            Util::merge($operation, ['tags' => $context[self::DEFAULT_TAGS_CONTEXT]]);
+        if ([] !== $routeContext->defaultTags) {
+            Util::merge($operation, ['tags' => $routeContext->defaultTags]);
         }
 
         $this->addTagFromControllerName($operation, $reflectionMethod);
-        $this->addTagFromActionFolder($operation, $reflectionMethod);
+        $this->addTagFromFolder($operation, $reflectionMethod);
     }
 
     /**
@@ -64,7 +57,7 @@ class TagDescriber implements OperationDescriberInterface
      */
     private function addTagFromControllerName(Operation $operation, ReflectionMethod $reflectionMethod): void
     {
-        if (!$this->tagFromControllerName) {
+        if (!$this->openApiRegister->getConfig()->tagFromControllerName) {
             return;
         }
 
@@ -80,13 +73,12 @@ class TagDescriber implements OperationDescriberInterface
     /**
      * @throws InvalidArgumentException
      */
-    private function addTagFromActionFolder(Operation $operation, ReflectionMethod $reflectionMethod): void
+    private function addTagFromFolder(Operation $operation, ReflectionMethod $reflectionMethod): void
     {
-        if (!$this->tagFromActionFolder) {
-            return;
-        }
-
-        if ('__invoke' !== $reflectionMethod->getName()) {
+        if (
+            (!$this->openApiRegister->getConfig()->tagFromActionFolder && '__invoke' === $reflectionMethod->getName())
+            && !$this->openApiRegister->getConfig()->tagFromControllerFolder
+        ) {
             return;
         }
 

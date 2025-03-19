@@ -8,6 +8,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Kr0lik\DtoToSwagger\Command\SwaggerGenerator;
+use Kr0lik\DtoToSwagger\Dto\ConfigDto;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\DescriptionDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\HeaderParameterDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\PathParameterDescriber;
@@ -96,11 +97,6 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
 
     private function registerOpenApiRegister(): void
     {
-        $this->app->when(OpenApiRegister::class)
-            ->needs('$openApiConfig')
-            ->give(config('swagger.openApi'))
-        ;
-
         $this->app->singleton(OpenApiRegister::class, OpenApiRegister::class);
     }
 
@@ -204,29 +200,6 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
      */
     private function registerOperationDescriber(): void
     {
-        $this->app->when(TagDescriber::class)
-            ->needs('$tagFromControllerName')
-            ->give(config('swagger.tagFromControllerName', false))
-        ;
-        $this->app->when(TagDescriber::class)
-            ->needs('$tagFromActionFolder')
-            ->give(config('swagger.tagFromActionFolder', false))
-        ;
-
-        $this->app->when(RequestDescriber::class)
-            ->needs('$requestErrorResponseSchemas')
-            ->give(config('swagger.requestErrorResponseSchemas', []))
-        ;
-        $this->app->when(RequestDescriber::class)
-            ->needs('$fileUploadType')
-            ->give(config('swagger.fileUploadType'))
-        ;
-
-        $this->app->when(ResponseDescriber::class)
-            ->needs('$defaultErrorResponseSchemas')
-            ->give(config('swagger.defaultErrorResponseSchemas', []))
-        ;
-
         $this->app->bind(OperationDescriberInterface::class, static function (): array {
             return [
                 DescriptionDescriber::class,
@@ -286,34 +259,6 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
 
     private function registerRoutingProcessor(): void
     {
-        $this->app->when(RouteProcessor::class)
-            ->needs('$middlewaresToAuth')
-            ->give(config('swagger.middlewaresToAuth', []))
-        ;
-
-        $this->app->when(RouteProcessor::class)
-            ->needs('$tagFromMiddlewares')
-            ->give(config('swagger.tagFromMiddlewares', []))
-        ;
-
-        $this->app->when(RoutingProcessor::class)
-            ->needs('$includeMiddlewares')
-            ->give(config('swagger.includeMiddlewares', []))
-        ;
-        $this->app->when(RoutingProcessor::class)
-            ->needs('$includePatterns')
-            ->give(config('swagger.includePatterns', []))
-        ;
-
-        $this->app->when(RoutingProcessor::class)
-            ->needs('$excludeMiddlewares')
-            ->give(config('swagger.excludeMiddlewares', []))
-        ;
-        $this->app->when(RoutingProcessor::class)
-            ->needs('$excludePatterns')
-            ->give(config('swagger.excludePatterns', []))
-        ;
-
         $this->app->singleton(RouteProcessor::class, RouteProcessor::class);
         $this->app->singleton(RoutingProcessor::class, RoutingProcessor::class);
     }
@@ -321,10 +266,36 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     private function registerCommand(): void
     {
         $this->app->when(SwaggerGenerator::class)
-            ->needs('$savePath')
-            ->give(config('swagger.savePath'))
+            ->needs('$configsPerKey')
+            ->give($this->getConfigsPerKey())
         ;
 
         $this->commands(SwaggerGenerator::class);
+    }
+
+    /**
+     * @return array<string, ConfigDto>
+     */
+    private function getConfigsPerKey(): array
+    {
+        $swaggerConfigs = config('swagger', []);
+        $defaultConfig = $swaggerConfigs['default'] ?? [];
+        unset($swaggerConfigs['default']);
+
+        $result = [];
+
+        if ([] !== $defaultConfig) {
+            $result['default'] = $defaultConfig;
+        }
+
+        if (array_key_exists('openApi', $swaggerConfigs)) {
+            return $result;
+        }
+
+        foreach ($swaggerConfigs as $configKey => $configValue) {
+            $result[$configKey] = array_merge($defaultConfig, $configValue);
+        }
+
+        return $result;
     }
 }

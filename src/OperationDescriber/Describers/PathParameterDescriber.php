@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 
 use InvalidArgumentException;
-use Kr0lik\DtoToSwagger\Attribute\Context;
+use Kr0lik\DtoToSwagger\Dto\RouteContextDto;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
@@ -21,7 +21,6 @@ class PathParameterDescriber implements OperationDescriberInterface
     use IsRequiredTrait;
 
     public const IN = 'path';
-    public const IN_PATH_PARAMETERS_CONTEXT = 'inPathParameters';
 
     public function __construct(
         private PropertyTypeDescriber $propertyDescriber,
@@ -29,25 +28,22 @@ class PathParameterDescriber implements OperationDescriberInterface
     ) {}
 
     /**
-     * @param array<string, mixed> $context
-     *
      * @throws InvalidArgumentException
      */
-    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
+    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, RouteContextDto $routeContext): void
     {
         $this->addFromAttributes($operation, $reflectionMethod);
 
         foreach ($this->reflectionPreparer->getArgumentTypes($reflectionMethod) as $name => $types) {
-            if (!array_key_exists($name, $context[self::IN_PATH_PARAMETERS_CONTEXT] ?? [])) {
+            if (!array_key_exists($name, $routeContext->inPathParametersPerName)) {
                 continue;
             }
 
             $schema = new Schema([]);
 
-            /** @var Context $currentPropertyContext */
-            $currentPropertyContext = $context[self::IN_PATH_PARAMETERS_CONTEXT][$name];
+            $currentPropertyContext = $routeContext->inPathParametersPerName[$name];
 
-            $this->propertyDescriber->describe($schema, $currentPropertyContext->jsonSerialize(), ...$types);
+            $this->propertyDescriber->describe($schema, $currentPropertyContext, ...$types);
 
             $parameter = Util::getOperationParameter($operation, $name, self::IN);
 
