@@ -274,6 +274,11 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     private function getConfigsPerKey(): array
     {
         $swaggerConfigs = config('swagger', []);
+
+        if (array_key_exists('openApi', $swaggerConfigs)) {
+            return ['default' => ConfigDto::fromArray($swaggerConfigs)];
+        }
+
         $defaultConfig = $swaggerConfigs['default'] ?? [];
         unset($swaggerConfigs['default']);
 
@@ -281,10 +286,6 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
 
         if ([] !== $defaultConfig) {
             $result['default'] = ConfigDto::fromArray($defaultConfig);
-        }
-
-        if (array_key_exists('openApi', $swaggerConfigs)) {
-            return $result;
         }
 
         foreach ($swaggerConfigs as $configKey => $configValue) {

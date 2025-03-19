@@ -76,7 +76,7 @@ class TagDescriber implements OperationDescriberInterface
     private function addTagFromFolder(Operation $operation, ReflectionMethod $reflectionMethod): void
     {
         if (
-            (!$this->openApiRegister->getConfig()->tagFromActionFolder && '__invoke' === $reflectionMethod->getName())
+            !($this->openApiRegister->getConfig()->tagFromActionFolder && '__invoke' === $reflectionMethod->getName())
             && !$this->openApiRegister->getConfig()->tagFromControllerFolder
         ) {
             return;
