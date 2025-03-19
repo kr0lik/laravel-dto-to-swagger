@@ -6,11 +6,11 @@
 
 💡 *No need to manually define schemas, tags, or routes!* The documentation is generated entirely based on your route definitions and DTOs. Just rely on your type annotations, and let the package handle the rest.
 
-🚀 Integrates with [`spatie/laravel-data`](https://github.com/spatie/laravel-data), making Swagger generation seamless and fully automated.
+💡 Integrates with [`spatie/laravel-data`](https://github.com/spatie/laravel-data), making Swagger generation seamless and fully automated.
 
-📌 The schema fully reflects your type definitions without manual intervention.
+💡 The schema fully reflects your type definitions without manual intervention.
 
-🛠 Based on `zircote/swagger-php`** for powerful OpenAPI support.
+💡 Based on `zircote/swagger-php`** for powerful OpenAPI support.
 
 ---
 
