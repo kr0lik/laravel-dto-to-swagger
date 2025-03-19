@@ -118,6 +118,8 @@ return [
     ],
     'else-one' => [
         'savePath' => base_path('swagger-else-one.yaml'),
+        'includeMiddlewares' => [],
+        'excludeMiddlewares' => ['api'],
         'openApi' => [
             'info' => [
                 'version' => '1.0.0',
