@@ -7,11 +7,13 @@ namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Attribute\Wrap;
 use Kr0lik\DtoToSwagger\Contract\JsonResponseInterface;
+use Kr0lik\DtoToSwagger\Dto\RouteContextDto;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
+use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use OpenApi\Annotations\JsonContent;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\Response;
@@ -23,27 +25,22 @@ use Symfony\Component\PropertyInfo\Type;
 
 class ResponseDescriber implements OperationDescriberInterface
 {
-    /**
-     * @param array<int, array<string, mixed>> $defaultErrorResponseSchemas
-     */
     public function __construct(
+        private OpenApiRegister $openApiRegister,
         private PropertyTypeDescriber $propertyDescriber,
         private ReflectionPreparer $reflectionPreparer,
-        private array $defaultErrorResponseSchemas,
     ) {}
 
     /**
-     * @param array<string, mixed> $context
-     *
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
+    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, RouteContextDto $routeContext): void
     {
         $this->addFromAttributes($operation, $reflectionMethod);
 
-        if ([] !== $this->defaultErrorResponseSchemas) {
-            Util::merge($operation, ['responses' => $this->defaultErrorResponseSchemas]);
+        if ([] !== $this->openApiRegister->getConfig()->defaultErrorResponseSchemas) {
+            Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->defaultErrorResponseSchemas]);
         }
 
         $returnTypes = $this->reflectionPreparer->getReturnTypes($reflectionMethod);

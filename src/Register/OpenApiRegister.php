@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kr0lik\DtoToSwagger\Register;
 
 use InvalidArgumentException;
+use Kr0lik\DtoToSwagger\Dto\ConfigDto;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use OpenApi\Annotations\Components;
 use OpenApi\Annotations\OpenApi;
@@ -17,21 +18,17 @@ final class OpenApiRegister
     /** @var array<string, string> */
     private array $nameRegister = [];
 
+    private ConfigDto $config;
     private OpenApi $openApi;
-
-    /**
-     * @param array<string, mixed> $openApiConfig
-     */
-    public function __construct(
-        private array $openApiConfig,
-    ) {}
 
     /**
      * @throws InvalidArgumentException
      */
-    public function initOpenApi(): OpenApi
+    public function initOpenApi(ConfigDto $config): void
     {
-        $this->openApi = new OpenApi($this->openApiConfig);
+        $this->config = $config;
+
+        $this->openApi = new OpenApi($this->config->openApi);
 
         $paths = $this->openApi->paths;
 
@@ -48,13 +45,21 @@ final class OpenApiRegister
                 Util::merge($pathItem, $pathData);
             }
         }
+    }
 
+    public function getOpenApi(): OpenApi
+    {
         return $this->openApi;
     }
 
-    public function register(Schema $schema, string $class): string
+    public function getConfig(): ConfigDto
     {
-        $path = $this->findPath($class);
+        return $this->config;
+    }
+
+    public function registerSchema(Schema $schema, string $class): string
+    {
+        $path = $this->findSchemaPath($class);
 
         if (null !== $path) {
             return $path;
@@ -97,7 +102,7 @@ final class OpenApiRegister
         return $this->getPath($shortName);
     }
 
-    public function findPath(string $class): ?string
+    public function findSchemaPath(string $class): ?string
     {
         if (array_key_exists($class, $this->nameRegister)) {
             return $this->getPath($this->getShortName($class));

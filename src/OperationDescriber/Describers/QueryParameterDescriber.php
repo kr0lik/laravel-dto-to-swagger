@@ -7,6 +7,7 @@ namespace Kr0lik\DtoToSwagger\OperationDescriber\Describers;
 use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Attribute\Nested;
 use Kr0lik\DtoToSwagger\Contract\QueryRequestInterface;
+use Kr0lik\DtoToSwagger\Dto\RouteContextDto;
 use Kr0lik\DtoToSwagger\Helper\ContextHelper;
 use Kr0lik\DtoToSwagger\Helper\NameHelper;
 use Kr0lik\DtoToSwagger\Helper\Util;
@@ -39,12 +40,10 @@ class QueryParameterDescriber implements OperationDescriberInterface
     ) {}
 
     /**
-     * @param array<string, mixed> $context
-     *
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, array $context = []): void
+    public function describe(Operation $operation, ReflectionMethod $reflectionMethod, RouteContextDto $routeContext): void
     {
         $this->addFromAttributes($operation, $reflectionMethod);
 
