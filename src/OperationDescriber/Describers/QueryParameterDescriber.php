@@ -16,6 +16,7 @@ use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\PhpDocReader;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
+use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use Kr0lik\DtoToSwagger\Trait\IsRequiredTrait;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\Parameter;
@@ -34,6 +35,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
     public const IN = 'query';
 
     public function __construct(
+        private OpenApiRegister $openApiRegister,
         private ReflectionPreparer $reflectionPreparer,
         private PropertyTypeDescriber $propertyDescriber,
         private PhpDocReader $phpDocReader,
@@ -91,6 +93,10 @@ class QueryParameterDescriber implements OperationDescriberInterface
                 'schema' => $this->getSchema($reflectionProperty),
             ], true);
 
+            if ([] !== $this->openApiRegister->getConfig()->requestErrorResponseSchemas) {
+                Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->requestErrorResponseSchemas]);
+            }
+
             if ($this->isDeprecated($reflectionProperty)) {
                 $parameter->deprecated = true;
             }
@@ -125,6 +131,10 @@ class QueryParameterDescriber implements OperationDescriberInterface
                 'schema' => $this->getSchema($reflectionProperty),
                 'name' => $this->buildNestedName(array_merge($nestedNames, [$parameter->name])),
             ], true);
+
+            if ([] !== $this->openApiRegister->getConfig()->requestErrorResponseSchemas) {
+                Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->requestErrorResponseSchemas]);
+            }
 
             if ($this->isDeprecated($reflectionProperty)) {
                 $parameter->deprecated = true;
