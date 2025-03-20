@@ -53,13 +53,13 @@ class RoutePreparer
                 Util::merge($operation, ['tags' => $defaultTags]);
             }
 
+            if ([] !== $this->openApiRegister->getConfig()->defaultErrorResponseSchemas) {
+                Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->defaultErrorResponseSchemas]);
+            }
+
             $reflectionMethod = $this->getReflection($route);
 
             if (null === $reflectionMethod) {
-                if ([] !== $this->openApiRegister->getConfig()->requestErrorResponseSchemas) {
-                    Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->requestErrorResponseSchemas]);
-                }
-
                 continue;
             }
 

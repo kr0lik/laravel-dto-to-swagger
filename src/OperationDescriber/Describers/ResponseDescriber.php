@@ -13,7 +13,6 @@ use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
-use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use OpenApi\Annotations\JsonContent;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\Response;
@@ -26,7 +25,6 @@ use Symfony\Component\PropertyInfo\Type;
 class ResponseDescriber implements OperationDescriberInterface
 {
     public function __construct(
-        private OpenApiRegister $openApiRegister,
         private PropertyTypeDescriber $propertyDescriber,
         private ReflectionPreparer $reflectionPreparer,
     ) {}
@@ -38,10 +36,6 @@ class ResponseDescriber implements OperationDescriberInterface
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, RouteContextDto $routeContext): void
     {
         $this->addFromAttributes($operation, $reflectionMethod);
-
-        if ([] !== $this->openApiRegister->getConfig()->defaultErrorResponseSchemas) {
-            Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->defaultErrorResponseSchemas]);
-        }
 
         $returnTypes = $this->reflectionPreparer->getReturnTypes($reflectionMethod);
 
