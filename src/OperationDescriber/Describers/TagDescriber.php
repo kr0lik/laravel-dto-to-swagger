@@ -29,10 +29,6 @@ class TagDescriber implements OperationDescriberInterface
     {
         $this->addFromAttributes($operation, $reflectionMethod);
 
-        if ([] !== $routeContext->defaultTags) {
-            Util::merge($operation, ['tags' => $routeContext->defaultTags]);
-        }
-
         $this->addTagFromControllerName($operation, $reflectionMethod);
         $this->addTagFromFolder($operation, $reflectionMethod);
     }

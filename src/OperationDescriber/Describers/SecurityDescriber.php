@@ -23,10 +23,6 @@ class SecurityDescriber implements OperationDescriberInterface
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, RouteContextDto $routeContext): void
     {
         $this->addFromAttributes($operation, $reflectionMethod);
-
-        if ([] !== $routeContext->defaultSecurities) {
-            Util::merge($operation, ['security' => $routeContext->defaultSecurities]);
-        }
     }
 
     /**

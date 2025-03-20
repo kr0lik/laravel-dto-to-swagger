@@ -37,15 +37,29 @@ class RoutePreparer
 
             $context = new RouteContextDto(
                 inPathParametersPerName: $this->getParametersPerName($route),
-                defaultSecurities: $this->getSecurities($route),
-                defaultTags: $this->getTags($route)
             );
 
             $operation = Util::getOperation($pathItem, $method);
 
+            $defaultSecurities = $this->getSecurities($route);
+
+            if ([] !== $defaultSecurities) {
+                Util::merge($operation, ['security' => $defaultSecurities]);
+            }
+
+            $defaultTags = $this->getTags($route);
+
+            if ([] !== $defaultTags) {
+                Util::merge($operation, ['tags' => $defaultTags]);
+            }
+
             $reflectionMethod = $this->getReflection($route);
 
             if (null === $reflectionMethod) {
+                if ([] !== $this->openApiRegister->getConfig()->requestErrorResponseSchemas) {
+                    Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->requestErrorResponseSchemas]);
+                }
+
                 continue;
             }
 
