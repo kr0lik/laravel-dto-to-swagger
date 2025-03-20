@@ -26,7 +26,7 @@ Register the service provider in `config/app.php` (if needed):
 Kr0lik\DtoToSwagger\DtoToSwaggerServiceProvider::class,
 ```
 
-Publish the configuration file:
+Publish the configuration file (swagger.php):
 
 ```bash
 $ php artisan vendor:publish --tag=swagger-config
@@ -36,9 +36,9 @@ $ php artisan vendor:publish --tag=swagger-config
 
 ## Configuration
 
-The config file is located at `config/swagger.php`. You can define multiple configurations (e.g., `default`, `custom-config`).
+The config file is located at `config/swagger.php`. You can define multiple configurations using keys (e.g., `default`, `custom-config`).
 
-**Key Configuration Options:**
+**Configuration Options:**
 
 - `savePath`: Path for the generated Swagger YAML file.
 - `includeMiddlewares`, `excludeMiddlewares`: Define which middlewares to include/exclude.
@@ -57,6 +57,26 @@ The config file is located at `config/swagger.php`. You can define multiple conf
 ## Usage
 
 Ensure that your controllers and DTOs are properly typed.
+
+To ensure correct schema generation, DTOs must implement one of the following interfaces depending on the type of data being described:
+
+    `Kr0lik\DtoToSwagger\Contract\JsonRequestInterface` – for JSON request bodies.
+    `Kr0lik\DtoToSwagger\Contract\QueryRequestInterface` – for query parameters.
+    `Kr0lik\DtoToSwagger\Contract\HeaderRequestInterface` – for request headers.
+    `Kr0lik\DtoToSwagger\Contract\JsonResponseInterface` – for JSON responses.
+
+This approach allows you to consolidate all request-related data into a single DTO while maintaining complete Swagger documentation coverage.
+
+#### Defining Additional Parameters in JsonRequestInterface
+
+Even if a DTO implements JsonRequestInterface (which primarily describes the request body), you can still define query parameters, path parameters, or headers within the same DTO. To do this, use OpenAPI attributes such as:
+
+    #[OpenApi\Attributes\Parameter(in: 'query')] – for query parameters.
+    #[OpenApi\Attributes\Parameter(in: 'path')] – for path parameters.
+    #[OpenApi\Attributes\Parameter(in: 'header')] – for header parameters.
+
+
+By implementing the appropriate interface, you enable automatic documentation generation without the need for manual schema definitions.
 
 Update the config/swagger.php file according to your needs.
 
@@ -356,6 +376,7 @@ class QueryRequest implements QueryRequestInterface
     }
 }
 ```
+
 #### Header Request DTO Extend Example
 
 ```php
@@ -377,7 +398,60 @@ final class HeadRequestDto implements HeaderRequestInterface
     }
 }
 ```
-See example folder
+
+#### Query Response DTO Extend Example
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Dto\Response;
+
+use DateTimeImmutable;
+use Kr0lik\DtoToSwagger\Attribute\Context;
+use Kr0lik\DtoToSwagger\Attribute\Wrap;
+use Kr0lik\DtoToSwagger\Contract\JsonResponseInterface;
+use OpenApi\Attributes\Property;
+use Spatie\LaravelData\Attributes\MapOutputName;
+use Spatie\LaravelData\Attributes\WithTransformer;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Transformers\DateTimeInterfaceTransformer;
+
+#[Wrap(ref: '#/components/schemas/JsonResponse', to: 'data', properties: [
+    'success' => ['default' => true],
+    'message' => ['default' => 'success'],
+    'errors' => ['default' => null],
+])]
+final class ResponseDto extends Data implements JsonResponseInterface
+{
+    public function __construct(
+        /** Some Description */
+        readonly int $int,
+        #[Property(description: 'some description', example: ['string', 'string2'])]
+        readonly string $string,
+        #[MapOutputName('date')]
+        #[WithTransformer(DateTimeInterfaceTransformer::class, format: 'Y-m-d')]
+        readonly DateTimeImmutable $dateTime,
+    ) {
+    }
+}
+```
+
+#### Additional Attributes for Enhanced Schema Customization
+
+In addition to standard OpenAPI attributes, you can leverage specialized attributes from the package to fine-tune the generated documentation and schema definitions:
+
+    Kr0lik\DtoToSwagger\Attribute\Context – Specifies additional context for property generation, such as formatting or enum values.
+    Kr0lik\DtoToSwagger\Attribute\Name – Allows renaming a property in the generated documentation, useful when the DTO property name differs from the expected API field.
+    Kr0lik\DtoToSwagger\Attribute\Nested – Enables structured query parameters, allowing representation of objects in query strings (e.g., metadata[thing1]=abc&metadata[thing2]=def).
+    Kr0lik\DtoToSwagger\Attribute\Security – Defines security settings such as authentication mechanisms directly within DTOs or controllers.
+    Kr0lik\DtoToSwagger\Attribute\Wrap – Wraps the data into a specific structure, useful for APIs that require responses to be enclosed within a defined schema.
+
+Using these attributes ensures that the generated Swagger documentation accurately reflects your API structure while minimizing manual configuration.
+
+
+**See example folder**
 
 ## Develop
 docker pull composer:2.2.20

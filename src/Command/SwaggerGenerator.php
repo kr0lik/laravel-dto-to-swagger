@@ -7,10 +7,7 @@ namespace Kr0lik\DtoToSwagger\Command;
 use Illuminate\Console\Command;
 use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Dto\ConfigDto;
-use Kr0lik\DtoToSwagger\Processor\RoutingProcessor;
-use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
-use ReflectionException;
-use RuntimeException;
+use Kr0lik\DtoToSwagger\Processor\AbstractProcessor;
 
 class SwaggerGenerator extends Command
 {
@@ -21,8 +18,7 @@ class SwaggerGenerator extends Command
      * @param array<string, ConfigDto> $configsPerKey
      */
     public function __construct(
-        private OpenApiRegister $openApiRegister,
-        private RoutingProcessor $routingProcessor,
+        private AbstractProcessor $processor,
         private array $configsPerKey,
     ) {
         parent::__construct();
@@ -30,18 +26,14 @@ class SwaggerGenerator extends Command
 
     /**
      * @throws InvalidArgumentException
-     * @throws ReflectionException
-     * @throws RuntimeException
      */
     public function handle(): void
     {
         $config = $this->getConfig();
 
-        $this->openApiRegister->initOpenApi($config);
+        $openApi = $this->processor->process($config);
 
-        $this->routingProcessor->process();
-
-        $this->openApiRegister->getOpenApi()->saveAs($config->savePath);
+        $openApi->saveAs($config->savePath);
     }
 
     /**

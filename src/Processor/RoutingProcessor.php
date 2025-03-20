@@ -11,22 +11,24 @@ use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use ReflectionException;
 use RuntimeException;
 
-class RoutingProcessor
+class RoutingProcessor extends AbstractProcessor
 {
     public function __construct(
-        private OpenApiRegister $openApiRegister,
-        private RouteProcessor $routeProcessor,
-    ) {}
+        private RoutePreparer $routePrepaprer,
+        OpenApiRegister $openApiRegister,
+    ) {
+        parent::__construct($openApiRegister);
+    }
 
     /**
      * @throws InvalidArgumentException
      * @throws ReflectionException
      * @throws RuntimeException
      */
-    public function process(): void
+    public function prepare(): void
     {
         foreach ($this->fetchRoute() as $route) {
-            $this->routeProcessor->process($route);
+            $this->routePrepaprer->prepare($route);
         }
     }
 

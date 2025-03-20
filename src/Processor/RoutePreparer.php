@@ -13,7 +13,7 @@ use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use ReflectionException;
 use ReflectionMethod;
 
-class RouteProcessor
+class RoutePreparer
 {
     private const SUPPORTED_METHODS = ['get', 'post', 'put', 'patch', 'delete'];
 
@@ -26,7 +26,7 @@ class RouteProcessor
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    public function process(Route $route): void
+    public function prepare(Route $route): void
     {
         $pathItem = Util::getPath($this->openApiRegister->getOpenApi(), $this->getPath($route));
 

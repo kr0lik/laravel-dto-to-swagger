@@ -19,7 +19,8 @@ use Kr0lik\DtoToSwagger\OperationDescriber\Describers\SecurityDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\TagDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriberInterface;
-use Kr0lik\DtoToSwagger\Processor\RouteProcessor;
+use Kr0lik\DtoToSwagger\Processor\AbstractProcessor;
+use Kr0lik\DtoToSwagger\Processor\RoutePreparer;
 use Kr0lik\DtoToSwagger\Processor\RoutingProcessor;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\ArrayDescriber;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\BooleanDescriber;
@@ -73,7 +74,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
         $this->registerReflectionPreparer();
         $this->registerPropertyTypeDescriber();
         $this->registerOperationDescriber();
-        $this->registerRoutingProcessor();
+        $this->registerProcessor();
         $this->registerCommand();
     }
 
@@ -90,12 +91,12 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
         ], 'swagger-config');
     }
 
-    private function registerOpenApiRegister(): void
+    protected function registerOpenApiRegister(): void
     {
         $this->app->singleton(OpenApiRegister::class, OpenApiRegister::class);
     }
 
-    private function registerPropertyExtractor(): void
+    protected function registerPropertyExtractor(): void
     {
         $this->app->singleton(PropertyInfoExtractor::class, static function (): PropertyInfoExtractor {
             $phpDocExtractor = new PhpDocExtractor();
@@ -114,7 +115,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     /**
      * @throws ContainerExceptionInterface
      */
-    private function registerReflectionTypePreparer(): void
+    protected function registerReflectionTypePreparer(): void
     {
         $this->app->bind(RefTypePreparerInterface::class, static function (Application $app): array {
             return [
@@ -142,7 +143,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     /**
      * @throws ContainerExceptionInterface
      */
-    private function registerDocTypePreparer(): void
+    protected function registerDocTypePreparer(): void
     {
         $this->app->bind(DocTypePreparerInterface::class, static function (Application $app): array {
             return [
@@ -170,7 +171,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     /**
      * @throws BindingResolutionException
      */
-    private function registerPhpDocReader(): void
+    protected function registerPhpDocReader(): void
     {
         $this->app->singleton(PhpDocReader::class, static function (Application $app): PhpDocReader {
             /** @var DocTypePreparer $docTypePreparer */
@@ -185,7 +186,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
         });
     }
 
-    private function registerReflectionPreparer(): void
+    protected function registerReflectionPreparer(): void
     {
         $this->app->singleton(ReflectionPreparer::class, ReflectionPreparer::class);
     }
@@ -193,7 +194,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     /**
      * @throws ContainerExceptionInterface
      */
-    private function registerOperationDescriber(): void
+    protected function registerOperationDescriber(): void
     {
         $this->app->bind(OperationDescriberInterface::class, static function (): array {
             return [
@@ -223,7 +224,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     /**
      * @throws ContainerExceptionInterface
      */
-    private function registerPropertyTypeDescriber(): void
+    protected function registerPropertyTypeDescriber(): void
     {
         $this->app->bind(PropertyTypeDescriberInterface::class, static function (): array {
             return [
@@ -252,13 +253,13 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
         }
     }
 
-    private function registerRoutingProcessor(): void
+    protected function registerProcessor(): void
     {
-        $this->app->singleton(RouteProcessor::class, RouteProcessor::class);
-        $this->app->singleton(RoutingProcessor::class, RoutingProcessor::class);
+        $this->app->singleton(RoutePreparer::class, RoutePreparer::class);
+        $this->app->singleton(AbstractProcessor::class, RoutingProcessor::class);
     }
 
-    private function registerCommand(): void
+    protected function registerCommand(): void
     {
         $this->app->when(SwaggerGenerator::class)
             ->needs('$configsPerKey')
@@ -271,7 +272,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     /**
      * @return array<string, ConfigDto>
      */
-    private function getConfigsPerKey(): array
+    protected function getConfigsPerKey(): array
     {
         $swaggerConfigs = config('swagger', []);
 
