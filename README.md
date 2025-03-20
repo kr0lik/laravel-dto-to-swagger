@@ -451,7 +451,7 @@ In addition to standard OpenAPI attributes, you can leverage specialized attribu
 Using these attributes ensures that the generated Swagger documentation accurately reflects your API structure while minimizing manual configuration.
 
 
-**See example folder**
+*See example folder*
 
 ## Develop
 docker pull composer:2.2.20
