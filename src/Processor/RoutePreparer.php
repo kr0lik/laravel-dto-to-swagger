@@ -43,7 +43,13 @@ class RoutePreparer
 
             $operation = Util::getOperation($pathItem, $method);
 
-            $this->operationDescriber->describe($operation, $this->getReflection($route), $context);
+            $reflectionMethod = $this->getReflection($route);
+
+            if (null === $reflectionMethod) {
+                continue;
+            }
+
+            $this->operationDescriber->describe($operation, $reflectionMethod, $context);
         }
     }
 
@@ -60,8 +66,12 @@ class RoutePreparer
     /**
      * @throws ReflectionException
      */
-    private function getReflection(Route $route): ReflectionMethod
+    private function getReflection(Route $route): ?ReflectionMethod
     {
+        if (!str_contains($route->action['uses'], '@')) {
+            return null;
+        }
+
         [$class, $action] = explode('@', $route->action['uses']);
 
         return new ReflectionMethod($class, $action);
