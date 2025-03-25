@@ -16,6 +16,7 @@ use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\Helper\ClassHelper;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\PhpDocReader;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\ReflectionPreparer;
+use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use Kr0lik\DtoToSwagger\Trait\IsRequiredTrait;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\Parameter;
@@ -34,6 +35,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
     public const IN = 'query';
 
     public function __construct(
+        private OpenApiRegister $openApiRegister,
         private ReflectionPreparer $reflectionPreparer,
         private PropertyTypeDescriber $propertyDescriber,
         private PhpDocReader $phpDocReader,
@@ -45,13 +47,21 @@ class QueryParameterDescriber implements OperationDescriberInterface
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, RouteContextDto $routeContext): void
     {
-        $this->addFromAttributes($operation, $reflectionMethod);
+        $isQueryParametersAdded = $this->addFromAttributes($operation, $reflectionMethod);
 
         foreach ($this->reflectionPreparer->getArgumentTypes($reflectionMethod) as $types) {
             if (1 === count($types) && is_subclass_of($types[0]->getClassName(), QueryRequestInterface::class)) {
                 $reflectionClass = new ReflectionClass($types[0]->getClassName());
 
-                $this->addQueryParametersFromObject($operation, $reflectionClass);
+                if ($this->addQueryParametersFromObject($operation, $reflectionClass)) {
+                    $isQueryParametersAdded = true;
+                }
+            }
+        }
+
+        if ($isQueryParametersAdded) {
+            if ([] !== $this->openApiRegister->getConfig()->requestErrorResponseSchemas) {
+                Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->requestErrorResponseSchemas]);
             }
         }
     }
@@ -59,32 +69,46 @@ class QueryParameterDescriber implements OperationDescriberInterface
     /**
      * @throws InvalidArgumentException
      */
-    private function addFromAttributes(Operation $operation, ReflectionMethod $reflectionMethod): void
+    private function addFromAttributes(Operation $operation, ReflectionMethod $reflectionMethod): bool
     {
+        $result = false;
+
         foreach ($reflectionMethod->getAttributes() as $attribute) {
             $attributeInstance = $attribute->newInstance();
 
             if ($attributeInstance instanceof Parameter && self::IN === $attributeInstance->in) {
                 $newParameter = Util::getOperationParameter($operation, $attributeInstance->name, $attributeInstance->in);
                 Util::merge($newParameter, $attributeInstance);
+
+                $result = true;
             }
         }
+
+        return $result;
     }
 
     /**
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass): void
+    private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass): bool
     {
+        $result = false;
+
         foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
             if ($this->isNested($reflectionProperty)) {
                 $this->addNestedParameters($operation, $reflectionProperty);
+
+                $result = true;
 
                 continue;
             }
 
             $parameter = $this->getParameter($operation, $reflectionProperty);
+
+            if (self::IN === $parameter->in) {
+                $result = true;
+            }
 
             Util::merge($parameter, [
                 'required' => $this->isRequired($reflectionProperty),
@@ -95,6 +119,8 @@ class QueryParameterDescriber implements OperationDescriberInterface
                 $parameter->deprecated = true;
             }
         }
+
+        return $result;
     }
 
     /**

@@ -82,7 +82,7 @@ class RoutePreparer
      */
     private function getReflection(Route $route): ?ReflectionMethod
     {
-        if (!str_contains($route->action['uses'], '@')) {
+        if (!is_string($route->action['uses']) || !str_contains($route->action['uses'], '@')) {
             return null;
         }
 
