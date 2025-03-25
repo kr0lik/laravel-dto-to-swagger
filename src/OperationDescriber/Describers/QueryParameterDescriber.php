@@ -47,13 +47,21 @@ class QueryParameterDescriber implements OperationDescriberInterface
      */
     public function describe(Operation $operation, ReflectionMethod $reflectionMethod, RouteContextDto $routeContext): void
     {
-        $this->addFromAttributes($operation, $reflectionMethod);
+        $isQueryParametersAdded = $this->addFromAttributes($operation, $reflectionMethod);
 
         foreach ($this->reflectionPreparer->getArgumentTypes($reflectionMethod) as $types) {
             if (1 === count($types) && is_subclass_of($types[0]->getClassName(), QueryRequestInterface::class)) {
                 $reflectionClass = new ReflectionClass($types[0]->getClassName());
 
-                $this->addQueryParametersFromObject($operation, $reflectionClass);
+                if ($this->addQueryParametersFromObject($operation, $reflectionClass)) {
+                    $isQueryParametersAdded = true;
+                }
+            }
+        }
+
+        if ($isQueryParametersAdded) {
+            if ([] !== $this->openApiRegister->getConfig()->requestErrorResponseSchemas) {
+                Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->requestErrorResponseSchemas]);
             }
         }
     }
@@ -61,46 +69,58 @@ class QueryParameterDescriber implements OperationDescriberInterface
     /**
      * @throws InvalidArgumentException
      */
-    private function addFromAttributes(Operation $operation, ReflectionMethod $reflectionMethod): void
+    private function addFromAttributes(Operation $operation, ReflectionMethod $reflectionMethod): bool
     {
+        $result = false;
+
         foreach ($reflectionMethod->getAttributes() as $attribute) {
             $attributeInstance = $attribute->newInstance();
 
             if ($attributeInstance instanceof Parameter && self::IN === $attributeInstance->in) {
                 $newParameter = Util::getOperationParameter($operation, $attributeInstance->name, $attributeInstance->in);
                 Util::merge($newParameter, $attributeInstance);
+
+                $result = true;
             }
         }
+
+        return $result;
     }
 
     /**
      * @throws InvalidArgumentException
      * @throws ReflectionException
      */
-    private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass): void
+    private function addQueryParametersFromObject(Operation $operation, ReflectionClass $reflectionClass): bool
     {
+        $result = false;
+
         foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
             if ($this->isNested($reflectionProperty)) {
                 $this->addNestedParameters($operation, $reflectionProperty);
+
+                $result = true;
 
                 continue;
             }
 
             $parameter = $this->getParameter($operation, $reflectionProperty);
 
+            if (self::IN === $parameter->in) {
+                $result = true;
+            }
+
             Util::merge($parameter, [
                 'required' => $this->isRequired($reflectionProperty),
                 'schema' => $this->getSchema($reflectionProperty),
             ], true);
 
-            if ([] !== $this->openApiRegister->getConfig()->requestErrorResponseSchemas) {
-                Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->requestErrorResponseSchemas]);
-            }
-
             if ($this->isDeprecated($reflectionProperty)) {
                 $parameter->deprecated = true;
             }
         }
+
+        return $result;
     }
 
     /**
@@ -131,10 +151,6 @@ class QueryParameterDescriber implements OperationDescriberInterface
                 'schema' => $this->getSchema($reflectionProperty),
                 'name' => $this->buildNestedName(array_merge($nestedNames, [$parameter->name])),
             ], true);
-
-            if ([] !== $this->openApiRegister->getConfig()->requestErrorResponseSchemas) {
-                Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->requestErrorResponseSchemas]);
-            }
 
             if ($this->isDeprecated($reflectionProperty)) {
                 $parameter->deprecated = true;
