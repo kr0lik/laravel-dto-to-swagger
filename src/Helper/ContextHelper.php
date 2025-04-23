@@ -19,7 +19,7 @@ class ContextHelper
      */
     public static function getContext(ReflectionProperty $reflectionProperty): array
     {
-        $context = new Context();
+        $context = new Context;
 
         foreach ($reflectionProperty->getAttributes() as $attribute) {
             $attributeInstance = $attribute->newInstance();
@@ -57,7 +57,7 @@ class ContextHelper
                 ) {
                     $format = $attributeInstance->arguments['format'] ?? '';
 
-                    if ('' !== $format) {
+                    if ($format !== '') {
                         $context = new Context(format: $context->format, pattern: self::phpToSwaggerDateTimePattern($format));
                     }
                 }
@@ -77,7 +77,7 @@ class ContextHelper
                     $format = current($format);
                 }
 
-                if (is_string($format) && '' !== $format) {
+                if (is_string($format) && $format !== '') {
                     $context = new Context(format: $context->format, pattern: self::phpToSwaggerDateTimePattern($format));
                 }
             }
@@ -112,7 +112,11 @@ class ContextHelper
                 // in:"wallet","-wallet","amount","-amount","status","-status","createdAt","-createdAt"
                 $format = (string) $attributeInstance;
 
-                $values = explode(',', str_replace(['in:', '"'], '', $format));
+                $format = str_replace(['in:', '"'], '', $format);
+
+                assert(is_string($format));
+
+                $values = explode(',', $format);
 
                 $context = new Context(enum: $values);
             }

@@ -14,7 +14,6 @@ use Kr0lik\ParamConverter\Annotation\ParamConverter;
 use OpenApi\Attributes\Response;
 use OpenApi\Attributes\Tag;
 use Spatie\RouteAttributes\Attributes\Route;
-use Spatie\RouteAttributes\Attributes\Where;
 use Spatie\RouteAttributes\Attributes\WhereUlid;
 
 class TextController extends Controller
@@ -28,7 +27,7 @@ class TextController extends Controller
     #[Response(response: 300, description: 'response-from-attribute')]
     public function postAction(RequestDto $requestDto, int|string|null $multipleVar, ?array $arrayOptionalVar = []): ResponseDto
     {
-        return new ResponseDto(1, 'string', new DateTimeImmutable());
+        return new ResponseDto(1, 'string', new DateTimeImmutable);
     }
 
     #[Route(['get'], 'get-route/{uuid}', middleware: ['api'])]
@@ -36,6 +35,6 @@ class TextController extends Controller
     #[ParamConverter('queryRequest', QueryRequest::class, options: ['source' => 'query'])]
     public function getAction(QueryRequest $queryRequest, HeadRequestDto $headers, string $uuid): ResponseDto
     {
-        return new ResponseDto(1, 'string', new DateTimeImmutable());
+        return new ResponseDto(1, 'string', new DateTimeImmutable);
     }
 }

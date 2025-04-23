@@ -27,7 +27,7 @@ class ObjectRefTypePreparer implements RefTypePreparerInterface
 
         $className = $reflectionType->getName();
 
-        if (Type::BUILTIN_TYPE_OBJECT === $className || stdClass::class === $className) {
+        if ($className === Type::BUILTIN_TYPE_OBJECT || $className === stdClass::class) {
             $className = null;
         }
 
@@ -38,11 +38,11 @@ class ObjectRefTypePreparer implements RefTypePreparerInterface
 
     public function supports(ReflectionType $reflectionType): bool
     {
-        if (!$reflectionType instanceof ReflectionNamedType) {
+        if (! $reflectionType instanceof ReflectionNamedType) {
             return false;
         }
 
-        if (Type::BUILTIN_TYPE_OBJECT === $reflectionType->getName()) {
+        if ($reflectionType->getName() === Type::BUILTIN_TYPE_OBJECT) {
             return true;
         }
 

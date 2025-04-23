@@ -53,11 +53,11 @@ class TagDescriber implements OperationDescriberInterface
      */
     private function addTagFromControllerName(Operation $operation, ReflectionMethod $reflectionMethod): void
     {
-        if (!$this->openApiRegister->getConfig()->tagFromControllerName) {
+        if (! ($this->openApiRegister->getConfig()->tagFromControllerName ?? false)) {
             return;
         }
 
-        if ('__invoke' === $reflectionMethod->getName()) {
+        if ($reflectionMethod->getName() === '__invoke') {
             return;
         }
 
@@ -72,8 +72,8 @@ class TagDescriber implements OperationDescriberInterface
     private function addTagFromFolder(Operation $operation, ReflectionMethod $reflectionMethod): void
     {
         if (
-            !($this->openApiRegister->getConfig()->tagFromActionFolder && '__invoke' === $reflectionMethod->getName())
-            && !$this->openApiRegister->getConfig()->tagFromControllerFolder
+            ! (($this->openApiRegister->getConfig()->tagFromActionFolder ?? false) && $reflectionMethod->getName() === '__invoke')
+            && ! ($this->openApiRegister->getConfig()->tagFromControllerFolder ?? false)
         ) {
             return;
         }

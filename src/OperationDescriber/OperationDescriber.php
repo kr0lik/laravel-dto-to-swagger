@@ -15,7 +15,7 @@ final class OperationDescriber
     /**
      * @var OperationDescriberInterface[]
      */
-    private array $operationDescribers;
+    private array $operationDescribers = [];
 
     public function addOperationDescriber(OperationDescriberInterface $operationDescriber): void
     {

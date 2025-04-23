@@ -12,6 +12,5 @@ final class HeadRequestDto implements HeaderRequestInterface
     public function __construct(
         #[Parameter(name: 'X-DEVICE-ID')]
         readonly string $deviceId,
-    ) {
-    }
+    ) {}
 }

@@ -35,7 +35,7 @@ class PathParameterDescriber implements OperationDescriberInterface
         $this->addFromAttributes($operation, $reflectionMethod);
 
         foreach ($this->reflectionPreparer->getArgumentTypes($reflectionMethod) as $name => $types) {
-            if (!array_key_exists($name, $routeContext->inPathParametersPerName)) {
+            if (! array_key_exists($name, $routeContext->inPathParametersPerName)) {
                 continue;
             }
 
@@ -62,7 +62,7 @@ class PathParameterDescriber implements OperationDescriberInterface
         foreach ($reflectionMethod->getAttributes() as $attribute) {
             $attributeInstance = $attribute->newInstance();
 
-            if ($attributeInstance instanceof Parameter && self::IN === $attributeInstance->in) {
+            if ($attributeInstance instanceof Parameter && $attributeInstance->in === self::IN) {
                 $newParameter = Util::getOperationParameter($operation, $attributeInstance->name, $attributeInstance->in);
                 Util::merge($newParameter, $attributeInstance);
             }

@@ -24,7 +24,11 @@ abstract class AbstractProcessor
 
         $this->prepare();
 
-        return $this->openApiRegister->getOpenApi();
+        $result = $this->openApiRegister->getOpenApi();
+
+        assert($result instanceof OpenApi);
+
+        return $result;
     }
 
     abstract protected function prepare(): void;

@@ -12,7 +12,7 @@ final class PropertyTypeDescriber
     /**
      * @var PropertyTypeDescriberInterface[]
      */
-    private array $propertyDescribers;
+    private array $propertyDescribers = [];
 
     public function addPropertyDescriber(PropertyTypeDescriberInterface $propertyDescriber): void
     {

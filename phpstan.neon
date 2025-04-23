@@ -1,12 +1,15 @@
 includes:
-  - vendor/kr0lik/phpstan-rules/extensions/general-extension.neon
-
+  - vendor/kr0lik/laravel-phpstan-rules/extensions/general-no-larastan.neon
 parameters:
-    checkGenericClassInNonGenericObjectType: false
-    treatPhpDocTypesAsCertain: false
+    paths:
+        - src
+    level: 8
+
     ignoreErrors:
+        - '#Strict comparison using [=\!]== between .+@OA\\\\Generator:.+ will always evaluate to [true|false]#'
         - '#Parameter \#1 \$objectOrClass of class Reflection.+ constructor expects .+ string given#'
-        - '#DtoToSwagger\\Attribute\\Security::\$_required type has no value type specified in iterable type array#'
+        - '#with generic class Reflection[a-zA-Z]+ but does not specify its types: T#'
+        - '#with generic class Reflection[a-zA-Z]+ does not specify its types: T#'
         -
           message: '#PHPDoc tag @throws with type .+ is not compatible with parent#'
           paths:
@@ -20,5 +23,8 @@ parameters:
           message: '#Variable property access on OpenApi#'
           path: src/Helper/Util.php
         -
-          message: '#Method Kr0lik\\DtoToSwagger\\Helper\\Util::getNestingIndexes\(\) should return#'
-          path: src/Helper/Util.php
+          message: '#Call to function is_subclass_of\(\) with object and class-string will always evaluate to true#'
+          path: src/PropertyTypeDescriber/Describers/ObjectDescriber.php
+        -
+          message: '#Unreachable statement - code above always terminates#'
+          path: src/PropertyTypeDescriber/Describers/ObjectDescriber.php

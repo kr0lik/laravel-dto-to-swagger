@@ -25,7 +25,7 @@ class NameHelper
 
             $name = self::fromLaravelData($attribute, $reflectionProperty);
 
-            if (null !== $name && '' !== $name) {
+            if ($name !== null && $name !== '') {
                 return $name;
             }
         }
@@ -40,7 +40,7 @@ class NameHelper
 
             $isResponse = ClassHelper::isImplementsRecursively($reflectionProperty->getDeclaringClass(), JsonResponseInterface::class);
 
-            if (!$isResponse && $attributeInstance instanceof MapInputName) {
+            if (! $isResponse && $attributeInstance instanceof MapInputName) {
                 return (string) $attributeInstance->input;
             }
 

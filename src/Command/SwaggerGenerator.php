@@ -12,6 +12,7 @@ use Kr0lik\DtoToSwagger\Processor\AbstractProcessor;
 class SwaggerGenerator extends Command
 {
     protected $signature = 'swagger:generate {configKey=default}';
+
     protected $description = 'Swagger generate command';
 
     /**
@@ -44,7 +45,7 @@ class SwaggerGenerator extends Command
         /** @var string $key */
         $key = $this->argument('configKey');
 
-        if (!array_key_exists($key, $this->configsPerKey)) {
+        if (! array_key_exists($key, $this->configsPerKey)) {
             throw new InvalidArgumentException("Swagger config key '{$key}' not exist. Available keys: ".implode(',', array_keys($this->configsPerKey)));
         }
 

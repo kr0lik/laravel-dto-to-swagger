@@ -10,6 +10,7 @@ use Kr0lik\DtoToSwagger\Dto\RouteContextDto;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\OperationDescriber\OperationDescriber;
 use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
+use OpenApi\Annotations\OpenApi;
 use ReflectionException;
 use ReflectionMethod;
 
@@ -28,10 +29,14 @@ class RoutePreparer
      */
     public function prepare(Route $route): void
     {
-        $pathItem = Util::getPath($this->openApiRegister->getOpenApi(), $this->getPath($route));
+        $openapi = $this->openApiRegister->getOpenApi();
+
+        assert($openapi instanceof OpenApi);
+
+        $pathItem = Util::getPath($openapi, $this->getPath($route));
 
         foreach ($route->methods() as $method) {
-            if (!$this->isSupported($method)) {
+            if (! $this->isSupported($method)) {
                 continue;
             }
 
@@ -43,23 +48,25 @@ class RoutePreparer
 
             $defaultSecurities = $this->getSecurities($route);
 
-            if ([] !== $defaultSecurities) {
+            if ($defaultSecurities !== []) {
                 Util::merge($operation, ['security' => $defaultSecurities]);
             }
 
             $defaultTags = $this->getTags($route);
 
-            if ([] !== $defaultTags) {
+            if ($defaultTags !== []) {
                 Util::merge($operation, ['tags' => $defaultTags]);
             }
 
-            if ([] !== $this->openApiRegister->getConfig()->defaultErrorResponseSchemas) {
-                Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->defaultErrorResponseSchemas]);
+            $defaultErrorResponseSchemas = $this->openApiRegister->getConfig()->defaultErrorResponseSchemas ?? [];
+
+            if ($defaultErrorResponseSchemas !== []) {
+                Util::merge($operation, ['responses' => $defaultErrorResponseSchemas]);
             }
 
             $reflectionMethod = $this->getReflection($route);
 
-            if (null === $reflectionMethod) {
+            if ($reflectionMethod === null) {
                 continue;
             }
 
@@ -82,7 +89,7 @@ class RoutePreparer
      */
     private function getReflection(Route $route): ?ReflectionMethod
     {
-        if (!is_string($route->action['uses']) || !str_contains($route->action['uses'], '@')) {
+        if (! is_string($route->action['uses']) || ! str_contains($route->action['uses'], '@')) {
             return null;
         }
 
@@ -96,10 +103,12 @@ class RoutePreparer
      */
     private function getParametersPerName(Route $route): array
     {
+        /** @var string[] $routeParameterNames */
+        $routeParameterNames = $route->parameterNames();
+
         $parameterNames = [];
 
-        /** @var string $parameterName */
-        foreach ($route->parameterNames() as $parameterName) {
+        foreach ($routeParameterNames as $parameterName) {
             $pattern = $route->wheres[$parameterName] ?? null;
 
             $parameterNames[$parameterName] = ['pattern' => $pattern];
@@ -113,11 +122,23 @@ class RoutePreparer
      */
     private function getSecurities(Route $route): array
     {
+        $middlewaresToAuth = $this->openApiRegister->getConfig()->middlewaresToAuth ?? [];
+
+        if ($middlewaresToAuth === []) {
+            return [];
+        }
+
+        $routeMiddlewares = $route->middleware();
+
+        if (! is_array($routeMiddlewares)) {
+            return [];
+        }
+
         $securities = [];
 
-        foreach ((array) $route->middleware() as $middleware) {
-            if (array_key_exists($middleware, $this->openApiRegister->getConfig()->middlewaresToAuth)) {
-                $securities[] = $this->openApiRegister->getConfig()->middlewaresToAuth[$middleware];
+        foreach ($routeMiddlewares as $middleware) {
+            if (array_key_exists($middleware, $middlewaresToAuth)) {
+                $securities[] = $middlewaresToAuth[$middleware];
             }
         }
 
@@ -129,10 +150,22 @@ class RoutePreparer
      */
     private function getTags(Route $route): array
     {
+        $tagFromMiddlewares = $this->openApiRegister->getConfig()->tagFromMiddlewares ?? [];
+
+        if ($tagFromMiddlewares === []) {
+            return [];
+        }
+
+        $routeMiddlewares = $route->middleware();
+
+        if (! is_array($routeMiddlewares)) {
+            return [];
+        }
+
         $tags = [];
 
-        foreach ((array) $route->middleware() as $middleware) {
-            if (in_array($middleware, $this->openApiRegister->getConfig()->tagFromMiddlewares, true)) {
+        foreach ($routeMiddlewares as $middleware) {
+            if (in_array($middleware, $tagFromMiddlewares, true)) {
                 $tags[] = $middleware;
             }
         }

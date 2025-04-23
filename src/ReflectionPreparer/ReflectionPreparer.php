@@ -27,7 +27,7 @@ class ReflectionPreparer
         return $this->propertyInfoExtractor->getTypes(
             $reflectionProperty->getDeclaringClass()->getName(),
             $reflectionProperty->getName(),
-        );
+        ) ?? [];
     }
 
     /**
@@ -44,6 +44,10 @@ class ReflectionPreparer
                 continue;
             }
 
+            if (! $reflectionParameter->getType() instanceof ReflectionType) {
+                continue;
+            }
+
             yield $reflectionParameter->getName() => $this->reflectionTypePreparer->prepare($reflectionParameter->getType());
         }
     }
@@ -55,7 +59,7 @@ class ReflectionPreparer
     {
         $phpDocReturnType = $this->phpDocReader->getReturnTypes($reflectionMethod);
 
-        if (null !== $phpDocReturnType) {
+        if ($phpDocReturnType !== null) {
             return $phpDocReturnType;
         }
 

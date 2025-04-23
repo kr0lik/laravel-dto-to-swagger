@@ -10,7 +10,7 @@ use Symfony\Component\PropertyInfo\Type;
 class RefTypePreparer
 {
     /** @var RefTypePreparerInterface[] */
-    private array $reflectionTypePreparers;
+    private array $reflectionTypePreparers = [];
 
     /**
      * @param array<string, mixed> $context

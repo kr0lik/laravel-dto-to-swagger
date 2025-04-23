@@ -99,8 +99,8 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     protected function registerPropertyExtractor(): void
     {
         $this->app->singleton(PropertyInfoExtractor::class, static function (): PropertyInfoExtractor {
-            $phpDocExtractor = new PhpDocExtractor();
-            $reflectionExtractor = new ReflectionExtractor();
+            $phpDocExtractor = new PhpDocExtractor;
+            $reflectionExtractor = new ReflectionExtractor;
 
             return new PropertyInfoExtractor(
                 [$reflectionExtractor],
@@ -263,8 +263,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
     {
         $this->app->when(SwaggerGenerator::class)
             ->needs('$configsPerKey')
-            ->give($this->getConfigsPerKey())
-        ;
+            ->give($this->getConfigsPerKey());
 
         $this->commands(SwaggerGenerator::class);
     }
@@ -285,10 +284,14 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
 
         $result = [];
 
-        if ([] !== $defaultConfig) {
+        if ($defaultConfig !== []) {
             $result['default'] = ConfigDto::fromArray($defaultConfig);
         }
 
+        /**
+         * @var string $configKey
+         * @var mixed  $configValue
+         */
         foreach ($swaggerConfigs as $configKey => $configValue) {
             $result[$configKey] = ConfigDto::fromArray(array_merge($defaultConfig, $configValue));
         }

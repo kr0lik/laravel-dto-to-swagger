@@ -28,10 +28,10 @@ class StringRefTypePreparer implements RefTypePreparerInterface
 
     public function supports(ReflectionType $reflectionType): bool
     {
-        if (!$reflectionType instanceof ReflectionNamedType) {
+        if (! $reflectionType instanceof ReflectionNamedType) {
             return false;
         }
 
-        return Type::BUILTIN_TYPE_STRING === $reflectionType->getName();
+        return $reflectionType->getName() === Type::BUILTIN_TYPE_STRING;
     }
 }

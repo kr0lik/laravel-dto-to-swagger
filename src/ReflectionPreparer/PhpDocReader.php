@@ -12,6 +12,7 @@ use phpDocumentor\Reflection\DocBlock\Tags\Param;
 use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Type as DocType;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -62,18 +63,22 @@ class PhpDocReader
         $docBlock = $this->getDockBLock($reflectionProperty);
 
         foreach ($docBlock->getTags() as $tag) {
-            if (!$tag instanceof Var_) {
+            if (! $tag instanceof Var_) {
                 continue;
             }
 
-            return $this->docTypePreparer->prepare($tag->getType(), [
+            $tagType = $tag->getType();
+
+            assert($tagType instanceof DocType);
+
+            return $this->docTypePreparer->prepare($tagType, [
                 ObjectDocTypePreparer::SOURCE_CLASS_CONTEXT => $reflectionProperty->getDeclaringClass()->getName(),
             ]);
         }
 
         $constructor = $reflectionProperty->getDeclaringClass()->getConstructor();
 
-        if (null === $constructor) {
+        if ($constructor === null) {
             return [];
         }
 
@@ -96,11 +101,19 @@ class PhpDocReader
         $result = [];
 
         foreach ($docBlock->getTags() as $tag) {
-            if (!$tag instanceof Param) {
+            if (! $tag instanceof Param) {
                 continue;
             }
 
-            $result[$tag->getVariableName()] = $this->docTypePreparer->prepare($tag->getType(), [
+            if ($tag->getVariableName() === null) {
+                continue;
+            }
+
+            $tagType = $tag->getType();
+
+            assert($tagType instanceof DocType);
+
+            $result[$tag->getVariableName()] = $this->docTypePreparer->prepare($tagType, [
                 ObjectDocTypePreparer::SOURCE_CLASS_CONTEXT => $reflectionMethod->getDeclaringClass()->getName(),
             ]);
         }
@@ -116,11 +129,15 @@ class PhpDocReader
         $docBlock = $this->getDockBLock($reflectionMethod);
 
         foreach ($docBlock->getTags() as $tag) {
-            if (!$tag instanceof Return_) {
+            if (! $tag instanceof Return_) {
                 continue;
             }
 
-            return $this->docTypePreparer->prepare($tag->getType(), [
+            $tagType = $tag->getType();
+
+            assert($tagType instanceof DocType);
+
+            return $this->docTypePreparer->prepare($tagType, [
                 ObjectDocTypePreparer::SOURCE_CLASS_CONTEXT => $reflectionMethod->getDeclaringClass()->getName(),
             ]);
         }
@@ -130,8 +147,8 @@ class PhpDocReader
 
     private function getDockBLock(ReflectionClass|ReflectionMethod|ReflectionProperty $reflection): DocBlock
     {
-        if (false === $reflection->getDocComment()) {
-            return new DocBlock();
+        if ($reflection->getDocComment() === false) {
+            return new DocBlock;
         }
 
         return $this->docBlockFactory->create($reflection);

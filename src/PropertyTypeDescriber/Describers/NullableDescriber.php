@@ -16,7 +16,7 @@ final class NullableDescriber implements PropertyTypeDescriberInterface
      */
     public function describe(Schema $property, array $context = [], Type ...$types): void
     {
-        if (Generator::UNDEFINED === $property->nullable) {
+        if ($property->nullable === Generator::UNDEFINED) {
             $property->nullable = true;
         }
     }

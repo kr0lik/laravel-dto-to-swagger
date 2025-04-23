@@ -11,6 +11,5 @@ final readonly class SubDto
         public ?string $stringNullable,
         public int|float|null $intFloatNullable,
         public ?object $objectNullableOptional = null,
-    ) {
-    }
+    ) {}
 }

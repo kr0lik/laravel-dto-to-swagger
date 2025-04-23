@@ -42,7 +42,7 @@ class RoutingProcessor extends AbstractProcessor
         $laravelRouteCollection = LaravelRoute::getRoutes();
 
         foreach ($laravelRouteCollection->getRoutes() as $route) {
-            if (!$this->isMatch($route)) {
+            if (! $this->isMatch($route)) {
                 continue;
             }
 
@@ -60,8 +60,10 @@ class RoutingProcessor extends AbstractProcessor
 
     private function isMatchMiddleware(Route $route): bool
     {
-        if ([] !== $this->openApiRegister->getConfig()->includeMiddlewares) {
-            return [] !== array_intersect($this->openApiRegister->getConfig()->includeMiddlewares, (array) $route->middleware());
+        $includeMiddlewares = $this->openApiRegister->getConfig()->includeMiddlewares ?? [];
+
+        if ($includeMiddlewares !== [] && is_array($route->middleware())) {
+            return array_intersect($includeMiddlewares, $route->middleware()) !== [];
         }
 
         return true;
@@ -69,12 +71,14 @@ class RoutingProcessor extends AbstractProcessor
 
     private function isMatchPattern(Route $route): bool
     {
-        if ([] === $this->openApiRegister->getConfig()->includePatterns) {
+        $includePatterns = $this->openApiRegister->getConfig()->includePatterns ?? [];
+
+        if ($includePatterns === []) {
             return true;
         }
 
-        foreach ($this->openApiRegister->getConfig()->includePatterns as $pathPattern) {
-            if (0 !== preg_match('/'.$pathPattern.'/', $route->uri())) {
+        foreach ($includePatterns as $pathPattern) {
+            if (preg_match('/'.$pathPattern.'/', $route->uri()) !== 0) {
                 return true;
             }
         }
@@ -84,8 +88,10 @@ class RoutingProcessor extends AbstractProcessor
 
     private function isNotMatchExcludeMiddleware(Route $route): bool
     {
-        if ([] !== $this->openApiRegister->getConfig()->excludeMiddlewares) {
-            return [] === array_intersect($this->openApiRegister->getConfig()->includeMiddlewares, (array) $route->middleware());
+        $excludeMiddlewares = $this->openApiRegister->getConfig()->excludeMiddlewares ?? [];
+
+        if ($excludeMiddlewares !== [] && is_array($route->middleware())) {
+            return array_intersect($excludeMiddlewares, $route->middleware()) === [];
         }
 
         return true;
@@ -93,12 +99,14 @@ class RoutingProcessor extends AbstractProcessor
 
     private function isNotMatchExcludePattern(Route $route): bool
     {
-        if ([] === $this->openApiRegister->getConfig()->excludePatterns) {
+        $excludePatterns = $this->openApiRegister->getConfig()->excludePatterns ?? [];
+
+        if ($excludePatterns === []) {
             return true;
         }
 
-        foreach ($this->openApiRegister->getConfig()->excludePatterns as $pathPattern) {
-            if (0 !== preg_match('/'.$pathPattern.'/', $route->uri())) {
+        foreach ($excludePatterns as $pathPattern) {
+            if (preg_match('/'.$pathPattern.'/', $route->uri()) !== 0) {
                 return false;
             }
         }

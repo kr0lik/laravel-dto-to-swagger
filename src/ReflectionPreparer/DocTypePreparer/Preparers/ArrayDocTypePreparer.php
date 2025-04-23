@@ -57,7 +57,7 @@ class ArrayDocTypePreparer implements DocTypePreparerInterface
         /** @var DocType|DocType[]|null $valueTypes */
         $valueTypes = $docType->getKeyType();
 
-        if (null === $valueTypes) {
+        if ($valueTypes === null) {
             return [];
         }
 
@@ -86,7 +86,7 @@ class ArrayDocTypePreparer implements DocTypePreparerInterface
         /** @var DocType|DocType[]|null $valueTypes */
         $valueTypes = $docType->getValueType();
 
-        if (null === $valueTypes) {
+        if ($valueTypes === null) {
             return [];
         }
 

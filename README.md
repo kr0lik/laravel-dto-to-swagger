@@ -458,7 +458,7 @@ docker pull composer:2.2.20
 
 docker run -v .:/app --rm composer:2.2.20 composer install
 
-docker run -v .:/app --rm composer:2.2.20 bin/php-cs-fixer fix
+docker run -v .:/app --rm composer:2.2.20 bin/pint
 
 docker run -v .:/app --rm composer:2.2.20 bin/phpstan analyse
 

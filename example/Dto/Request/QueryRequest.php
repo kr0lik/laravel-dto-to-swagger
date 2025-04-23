@@ -13,10 +13,9 @@ class QueryRequest implements QueryRequestInterface
     public function __construct(
         readonly int $page,
         #[Parameter(name: 'per-page')]
-        readonly int $perPage = 20,
+        readonly int $perPage,
 
         #[Nested]
         readonly SortDto $sort,
-    ) {
-    }
+    ) {}
 }

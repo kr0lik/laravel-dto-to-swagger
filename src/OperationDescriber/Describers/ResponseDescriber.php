@@ -39,18 +39,18 @@ class ResponseDescriber implements OperationDescriberInterface
 
         $returnTypes = $this->reflectionPreparer->getReturnTypes($reflectionMethod);
 
-        if (null === $returnTypes) {
+        if ($returnTypes === null) {
             return;
         }
 
         foreach ($returnTypes as $returnType) {
-            if (is_subclass_of($returnType->getClassName(), JsonResponseInterface::class)) {
-                $this->addResponseFromObject($operation, $returnType);
-
+            if ($returnType->getClassName() === null) {
                 continue;
             }
 
-            if (null === $returnType->getClassName()) {
+            if (is_subclass_of($returnType->getClassName(), JsonResponseInterface::class)) {
+                $this->addResponseFromObject($operation, $returnType);
+
                 continue;
             }
 
@@ -78,7 +78,11 @@ class ResponseDescriber implements OperationDescriberInterface
             $attributeInstance = $attribute->newInstance();
 
             if ($attributeInstance instanceof Response) {
-                Util::createCollectionItem($operation, 'responses', Response::class, (array) $attributeInstance->jsonSerialize());
+                $attributeData = $attributeInstance->jsonSerialize();
+
+                assert(is_array($attributeData));
+
+                Util::createCollectionItem($operation, 'responses', Response::class, $attributeData);
             }
         }
     }

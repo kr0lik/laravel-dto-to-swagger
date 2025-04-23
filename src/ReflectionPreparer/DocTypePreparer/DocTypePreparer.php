@@ -10,7 +10,7 @@ use Symfony\Component\PropertyInfo\Type;
 class DocTypePreparer
 {
     /** @var DocTypePreparerInterface[] */
-    private array $tagPreparers;
+    private array $tagPreparers = [];
 
     /**
      * @param array<string, mixed> $context

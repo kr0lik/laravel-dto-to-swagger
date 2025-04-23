@@ -8,6 +8,4 @@ use OpenApi\Attributes\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Response(response: 200, description: 'basic-response', ref: '#/components/schemas/JsonResponse')]
-class SuccessResponse extends JsonResponse
-{
-}
+class SuccessResponse extends JsonResponse {}

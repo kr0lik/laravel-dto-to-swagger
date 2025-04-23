@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Dto\Request;
 
 use Kr0lik\DtoToSwagger\Attribute\Name;

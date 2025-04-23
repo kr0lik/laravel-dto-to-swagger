@@ -45,6 +45,5 @@ final class RequestDto implements JsonRequestInterface
         readonly StringEnum $enum,
         readonly UploadedFile $uploadedFile,
         readonly Collection $collectionOfString,
-    ) {
-    }
+    ) {}
 }

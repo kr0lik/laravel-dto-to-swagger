@@ -50,7 +50,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
         $isQueryParametersAdded = $this->addFromAttributes($operation, $reflectionMethod);
 
         foreach ($this->reflectionPreparer->getArgumentTypes($reflectionMethod) as $types) {
-            if (1 === count($types) && is_subclass_of($types[0]->getClassName(), QueryRequestInterface::class)) {
+            if (count($types) === 1 && $types[0]->getClassName() !== null && is_subclass_of($types[0]->getClassName(), QueryRequestInterface::class)) {
                 $reflectionClass = new ReflectionClass($types[0]->getClassName());
 
                 if ($this->addQueryParametersFromObject($operation, $reflectionClass)) {
@@ -60,8 +60,10 @@ class QueryParameterDescriber implements OperationDescriberInterface
         }
 
         if ($isQueryParametersAdded) {
-            if ([] !== $this->openApiRegister->getConfig()->requestErrorResponseSchemas) {
-                Util::merge($operation, ['responses' => $this->openApiRegister->getConfig()->requestErrorResponseSchemas]);
+            $requestErrorResponseSchemas = $this->openApiRegister->getConfig()->requestErrorResponseSchemas ?? [];
+
+            if ($requestErrorResponseSchemas !== []) {
+                Util::merge($operation, ['responses' => $requestErrorResponseSchemas]);
             }
         }
     }
@@ -76,7 +78,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
         foreach ($reflectionMethod->getAttributes() as $attribute) {
             $attributeInstance = $attribute->newInstance();
 
-            if ($attributeInstance instanceof Parameter && self::IN === $attributeInstance->in) {
+            if ($attributeInstance instanceof Parameter && $attributeInstance->in === self::IN) {
                 $newParameter = Util::getOperationParameter($operation, $attributeInstance->name, $attributeInstance->in);
                 Util::merge($newParameter, $attributeInstance);
 
@@ -106,7 +108,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
 
             $parameter = $this->getParameter($operation, $reflectionProperty);
 
-            if (self::IN === $parameter->in) {
+            if ($parameter->in === self::IN) {
                 $result = true;
             }
 
@@ -164,14 +166,14 @@ class QueryParameterDescriber implements OperationDescriberInterface
 
     private function isNested(ReflectionProperty $reflectionProperty): bool
     {
-        if (!$reflectionProperty->getType() instanceof ReflectionNamedType || $reflectionProperty->getType()->isBuiltin()) {
+        if (! $reflectionProperty->getType() instanceof ReflectionNamedType || $reflectionProperty->getType()->isBuiltin()) {
             return false;
         }
 
         $attributes = $reflectionProperty->getAttributes(Nested::class);
 
         foreach ($attributes as $attribute) {
-            if (Nested::class === $attribute->getName()) {
+            if ($attribute->getName() === Nested::class) {
                 return true;
             }
         }
@@ -187,7 +189,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
             if ($attributeInstance instanceof Parameter) {
                 $name = $attributeInstance->name;
 
-                if (Generator::UNDEFINED !== $name && null !== $name && '' !== $name) {
+                if ($name !== Generator::UNDEFINED && $name !== '') {
                     return $name;
                 }
             }
@@ -202,6 +204,8 @@ class QueryParameterDescriber implements OperationDescriberInterface
     private function buildNestedName(array $nestedNames): string
     {
         $result = array_shift($nestedNames);
+
+        assert(is_string($result));
 
         foreach ($nestedNames as $name) {
             $result .= "[{$name}]";
@@ -221,11 +225,11 @@ class QueryParameterDescriber implements OperationDescriberInterface
             if ($attributeInstance instanceof Parameter) {
                 $name = $attributeInstance->name;
 
-                if (Generator::UNDEFINED === $name || null === $name || '' === $name) {
+                if ($name === Generator::UNDEFINED || $name === '') {
                     $name = NameHelper::getName($reflectionProperty);
                 }
 
-                if (Generator::UNDEFINED === $attributeInstance->in || null === $attributeInstance->in || '' === $attributeInstance->in) {
+                if ($attributeInstance->in === Generator::UNDEFINED || $attributeInstance->in === null || $attributeInstance->in === '') {
                     $attributeInstance->in = self::IN;
                 }
 

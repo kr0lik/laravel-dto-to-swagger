@@ -27,7 +27,7 @@ class CompoundPropertyDescriber implements PropertyTypeDescriberInterface
     {
         $hasNullable = $this->hasNullable(...$types);
 
-        if ($hasNullable && 2 === count($types)) {
+        if ($hasNullable && count($types) === 2) {
             foreach ($types as $type) {
                 $this->propertyDescriber->describe($property, $context, $type);
             }
@@ -35,7 +35,7 @@ class CompoundPropertyDescriber implements PropertyTypeDescriberInterface
             return;
         }
 
-        $property->oneOf = Generator::UNDEFINED !== $property->oneOf ? $property->oneOf : [];
+        $property->oneOf = $property->oneOf !== Generator::UNDEFINED ? $property->oneOf : [];
 
         foreach ($types as $type) {
             /** @var Schema $schema */
@@ -55,7 +55,7 @@ class CompoundPropertyDescriber implements PropertyTypeDescriberInterface
     private function hasNullable(Type ...$types): bool
     {
         foreach ($types as $type) {
-            if (Type::BUILTIN_TYPE_NULL === $type->getBuiltinType()) {
+            if ($type->getBuiltinType() === Type::BUILTIN_TYPE_NULL) {
                 return true;
             }
         }

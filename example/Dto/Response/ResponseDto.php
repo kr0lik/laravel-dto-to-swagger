@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Dto\Response;
 
 use DateTimeImmutable;
-use Kr0lik\DtoToSwagger\Attribute\Context;
 use Kr0lik\DtoToSwagger\Attribute\Wrap;
 use Kr0lik\DtoToSwagger\Contract\JsonResponseInterface;
 use OpenApi\Attributes\Property;
@@ -29,6 +28,5 @@ final class ResponseDto extends Data implements JsonResponseInterface
         #[MapOutputName('date')]
         #[WithTransformer(DateTimeInterfaceTransformer::class, format: 'Y-m-d')]
         readonly DateTimeImmutable $dateTime,
-    ) {
-    }
+    ) {}
 }
