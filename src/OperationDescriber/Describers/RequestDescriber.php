@@ -156,7 +156,7 @@ class RequestDescriber implements OperationDescriberInterface
      */
     private function searchAndDescribeFIleUploadType(Operation $operation, Type $type): void
     {
-        $fileUploadProperties = $this->searchFIleUploadProperties($type);
+        $fileUploadProperties = $this->searchFileUploadProperties($type);
 
         if ([] === $fileUploadProperties) {
             return;
@@ -183,7 +183,7 @@ class RequestDescriber implements OperationDescriberInterface
      *
      * @return array<string, array<string, mixed>>
      */
-    private function searchFIleUploadProperties(Type $type): array
+    private function searchFileUploadProperties(Type $type): array
     {
         $fileUploadType = $this->openApiRegister->getConfig()->fileUploadType ?? '';
 
@@ -213,7 +213,7 @@ class RequestDescriber implements OperationDescriberInterface
 
                 $context = ContextHelper::getContext($reflectionProperty);
 
-                $fileUploadProperties[$name] = array_merge($context, ['type' => 'string']);
+                $fileUploadProperties[$name] = array_merge($context, ['type' => 'string', 'format' => 'binary']);
             }
         }
 
