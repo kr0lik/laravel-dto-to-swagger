@@ -27,11 +27,11 @@ class NamespaceHelper
             return $refClass->getNamespaceName().'\\'.$type;
         }
 
-        if (! array_key_exists($fromClass, self::$register)) {
+        if (!array_key_exists($fromClass, self::$register)) {
             self::registerUses($refClass);
         }
 
-        if (! array_key_exists($type, self::$register[$fromClass])) {
+        if (!array_key_exists($type, self::$register[$fromClass])) {
             throw new RuntimeException('No namespace found for '.$type);
         }
 
@@ -45,13 +45,13 @@ class NamespaceHelper
     {
         $filename = $refClass->getFileName();
 
-        if ($filename === false) {
+        if (false === $filename) {
             throw new RuntimeException('No file for '.$refClass->getName());
         }
 
         $fileContent = file_get_contents($filename);
 
-        if ($fileContent === false) {
+        if (false === $fileContent) {
             throw new RuntimeException('File not found '.$refClass->getName());
         }
 

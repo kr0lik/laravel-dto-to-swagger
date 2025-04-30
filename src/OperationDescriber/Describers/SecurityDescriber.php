@@ -37,7 +37,7 @@ class SecurityDescriber implements OperationDescriberInterface
             if ($instance instanceof Security) {
                 $securityName = $instance->name;
 
-                assert($securityName !== null);
+                assert(null !== $securityName);
 
                 Util::merge($operation, ['security' => [$securityName => $instance->scopes]], true);
             }

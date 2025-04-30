@@ -35,7 +35,7 @@ class CompoundRefTypePreparer implements RefTypePreparerInterface
 
         /** @var ReflectionNamedType $type */
         foreach ($reflectionType->getTypes() as $type) {
-            if ($type->getName() === Type::BUILTIN_TYPE_NULL) {
+            if (Type::BUILTIN_TYPE_NULL === $type->getName()) {
                 $hasNullable = true;
 
                 continue;

@@ -1,5 +1,6 @@
 includes:
-  - vendor/kr0lik/laravel-phpstan-rules/extensions/general-no-larastan.neon
+    - vendor/kr0lik/phpstan-rules/extensions/general-extension.neon
+
 parameters:
     paths:
         - src
@@ -28,3 +29,8 @@ parameters:
         -
           message: '#Unreachable statement - code above always terminates#'
           path: src/PropertyTypeDescriber/Describers/ObjectDescriber.php
+        -
+          message: '#Constructor in .+ has parameter .+ with default value#'
+          paths:
+                - src/Dto/*
+                - src/Attribute/*

@@ -23,7 +23,7 @@ class DateTimeDescriber implements PropertyTypeDescriberInterface
     {
         $property->type = 'string';
 
-        if ($property->format === null || $property->format === Generator::UNDEFINED) {
+        if (null === $property->format || Generator::UNDEFINED === $property->format) {
             $property->format = 'date-time';
         }
 
@@ -32,9 +32,9 @@ class DateTimeDescriber implements PropertyTypeDescriberInterface
 
     public function supports(Type ...$types): bool
     {
-        return count($types) === 1
-            && $types[0]->getBuiltinType() === Type::BUILTIN_TYPE_OBJECT
-            && $types[0]->getClassName() !== null
+        return 1 === count($types)
+            && Type::BUILTIN_TYPE_OBJECT === $types[0]->getBuiltinType()
+            && null !== $types[0]->getClassName()
             && is_a($types[0]->getClassName(), DateTimeInterface::class, true);
     }
 }

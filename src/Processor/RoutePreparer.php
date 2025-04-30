@@ -36,7 +36,7 @@ class RoutePreparer
         $pathItem = Util::getPath($openapi, $this->getPath($route));
 
         foreach ($route->methods() as $method) {
-            if (! $this->isSupported($method)) {
+            if (!$this->isSupported($method)) {
                 continue;
             }
 
@@ -48,25 +48,25 @@ class RoutePreparer
 
             $defaultSecurities = $this->getSecurities($route);
 
-            if ($defaultSecurities !== []) {
+            if ([] !== $defaultSecurities) {
                 Util::merge($operation, ['security' => $defaultSecurities]);
             }
 
             $defaultTags = $this->getTags($route);
 
-            if ($defaultTags !== []) {
+            if ([] !== $defaultTags) {
                 Util::merge($operation, ['tags' => $defaultTags]);
             }
 
             $defaultErrorResponseSchemas = $this->openApiRegister->getConfig()->defaultErrorResponseSchemas ?? [];
 
-            if ($defaultErrorResponseSchemas !== []) {
+            if ([] !== $defaultErrorResponseSchemas) {
                 Util::merge($operation, ['responses' => $defaultErrorResponseSchemas]);
             }
 
             $reflectionMethod = $this->getReflection($route);
 
-            if ($reflectionMethod === null) {
+            if (null === $reflectionMethod) {
                 continue;
             }
 
@@ -89,7 +89,7 @@ class RoutePreparer
      */
     private function getReflection(Route $route): ?ReflectionMethod
     {
-        if (! is_string($route->action['uses']) || ! str_contains($route->action['uses'], '@')) {
+        if (!is_string($route->action['uses']) || !str_contains($route->action['uses'], '@')) {
             return null;
         }
 
@@ -124,13 +124,13 @@ class RoutePreparer
     {
         $middlewaresToAuth = $this->openApiRegister->getConfig()->middlewaresToAuth ?? [];
 
-        if ($middlewaresToAuth === []) {
+        if ([] === $middlewaresToAuth) {
             return [];
         }
 
         $routeMiddlewares = $route->middleware();
 
-        if (! is_array($routeMiddlewares)) {
+        if (!is_array($routeMiddlewares)) {
             return [];
         }
 
@@ -152,13 +152,13 @@ class RoutePreparer
     {
         $tagFromMiddlewares = $this->openApiRegister->getConfig()->tagFromMiddlewares ?? [];
 
-        if ($tagFromMiddlewares === []) {
+        if ([] === $tagFromMiddlewares) {
             return [];
         }
 
         $routeMiddlewares = $route->middleware();
 
-        if (! is_array($routeMiddlewares)) {
+        if (!is_array($routeMiddlewares)) {
             return [];
         }
 

@@ -45,13 +45,13 @@ final class OpenApiRegister
 
     public function registerSchema(Schema $schema, string $class): string
     {
-        if ($this->openApi === null) {
+        if (null === $this->openApi) {
             throw new RuntimeException('OpenApi does not inited');
         }
 
         $path = $this->findSchemaPath($class);
 
-        if ($path !== null) {
+        if (null !== $path) {
             return $path;
         }
 
@@ -59,17 +59,17 @@ final class OpenApiRegister
 
         $counter = array_count_values($this->nameRegister)[$shortName] ?? 0;
 
-        if ($this->openApi->components === Generator::UNDEFINED) {
+        if (Generator::UNDEFINED === $this->openApi->components) {
             $this->openApi->components = new Components([]);
         }
 
-        if ($this->openApi->components->schemas === Generator::UNDEFINED) {
+        if (Generator::UNDEFINED === $this->openApi->components->schemas) {
             $this->openApi->components->schemas = [];
         }
 
         foreach ($this->openApi->components->schemas as $existsSchema) {
             if ($existsSchema->schema === $shortName) {
-                $counter++;
+                ++$counter;
 
                 break;
             }
@@ -103,7 +103,7 @@ final class OpenApiRegister
 
         assert($openApi instanceof OpenApi);
 
-        if ($openApi->paths === Generator::UNDEFINED) {
+        if (Generator::UNDEFINED === $openApi->paths) {
             return;
         }
 
@@ -128,7 +128,7 @@ final class OpenApiRegister
 
         assert($openApi instanceof OpenApi);
 
-        if ($openApi->components === Generator::UNDEFINED) {
+        if (Generator::UNDEFINED === $openApi->components) {
             return;
         }
 
@@ -149,11 +149,11 @@ final class OpenApiRegister
         /** @var Components|string $components */
         $components = $openApi->components;
 
-        if (! $components instanceof Components) {
+        if (!$components instanceof Components) {
             return;
         }
 
-        if ($components->schemas === Generator::UNDEFINED) {
+        if (Generator::UNDEFINED === $components->schemas) {
             $components->schemas = [];
         }
 
@@ -167,7 +167,7 @@ final class OpenApiRegister
 
             $schema = new Schema($existsSchema);
 
-            if ($schema->schema === Generator::UNDEFINED && is_string($key)) {
+            if (Generator::UNDEFINED === $schema->schema && is_string($key)) {
                 $schema->schema = $key;
             }
 

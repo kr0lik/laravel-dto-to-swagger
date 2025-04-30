@@ -44,7 +44,7 @@ class ReflectionPreparer
                 continue;
             }
 
-            if (! $reflectionParameter->getType() instanceof ReflectionType) {
+            if (!$reflectionParameter->getType() instanceof ReflectionType) {
                 continue;
             }
 
@@ -59,7 +59,7 @@ class ReflectionPreparer
     {
         $phpDocReturnType = $this->phpDocReader->getReturnTypes($reflectionMethod);
 
-        if ($phpDocReturnType !== null) {
+        if (null !== $phpDocReturnType) {
             return $phpDocReturnType;
         }
 

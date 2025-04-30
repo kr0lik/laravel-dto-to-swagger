@@ -32,7 +32,7 @@ class ArrayDescriber implements PropertyTypeDescriberInterface
 
         $type = $types[0]->getCollectionValueTypes()[0] ?? null;
 
-        if ($type === null) {
+        if (null === $type) {
             return;
         }
 
@@ -41,6 +41,6 @@ class ArrayDescriber implements PropertyTypeDescriberInterface
 
     public function supports(Type ...$types): bool
     {
-        return count($types) === 1 && $types[0]->isCollection();
+        return 1 === count($types) && $types[0]->isCollection();
     }
 }

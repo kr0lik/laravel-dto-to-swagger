@@ -42,7 +42,7 @@ class RoutingProcessor extends AbstractProcessor
         $laravelRouteCollection = LaravelRoute::getRoutes();
 
         foreach ($laravelRouteCollection->getRoutes() as $route) {
-            if (! $this->isMatch($route)) {
+            if (!$this->isMatch($route)) {
                 continue;
             }
 
@@ -62,8 +62,8 @@ class RoutingProcessor extends AbstractProcessor
     {
         $includeMiddlewares = $this->openApiRegister->getConfig()->includeMiddlewares ?? [];
 
-        if ($includeMiddlewares !== [] && is_array($route->middleware())) {
-            return array_intersect($includeMiddlewares, $route->middleware()) !== [];
+        if ([] !== $includeMiddlewares && is_array($route->middleware())) {
+            return [] !== array_intersect($includeMiddlewares, $route->middleware());
         }
 
         return true;
@@ -73,12 +73,12 @@ class RoutingProcessor extends AbstractProcessor
     {
         $includePatterns = $this->openApiRegister->getConfig()->includePatterns ?? [];
 
-        if ($includePatterns === []) {
+        if ([] === $includePatterns) {
             return true;
         }
 
         foreach ($includePatterns as $pathPattern) {
-            if (preg_match('/'.$pathPattern.'/', $route->uri()) !== 0) {
+            if (0 !== preg_match('/'.$pathPattern.'/', $route->uri())) {
                 return true;
             }
         }
@@ -90,8 +90,8 @@ class RoutingProcessor extends AbstractProcessor
     {
         $excludeMiddlewares = $this->openApiRegister->getConfig()->excludeMiddlewares ?? [];
 
-        if ($excludeMiddlewares !== [] && is_array($route->middleware())) {
-            return array_intersect($excludeMiddlewares, $route->middleware()) === [];
+        if ([] !== $excludeMiddlewares && is_array($route->middleware())) {
+            return [] === array_intersect($excludeMiddlewares, $route->middleware());
         }
 
         return true;
@@ -101,12 +101,12 @@ class RoutingProcessor extends AbstractProcessor
     {
         $excludePatterns = $this->openApiRegister->getConfig()->excludePatterns ?? [];
 
-        if ($excludePatterns === []) {
+        if ([] === $excludePatterns) {
             return true;
         }
 
         foreach ($excludePatterns as $pathPattern) {
-            if (preg_match('/'.$pathPattern.'/', $route->uri()) !== 0) {
+            if (0 !== preg_match('/'.$pathPattern.'/', $route->uri())) {
                 return false;
             }
         }

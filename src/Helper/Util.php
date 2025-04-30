@@ -92,7 +92,7 @@ final class Util
         /** @var Components|string $components */
         $components = $api->components;
 
-        if (! $components instanceof Components) {
+        if (!$components instanceof Components) {
             $api->components = new Components(['_context' => self::createWeakContext($api->_context)]);
         }
 
@@ -184,7 +184,7 @@ final class Util
         $nested = $parent::$_nested;
         $property = $nested[$className];
 
-        if ($parent->{$property} === null || $parent->{$property} === Generator::UNDEFINED) {
+        if (null === $parent->{$property} || Generator::UNDEFINED === $parent->{$property}) {
             $parent->{$property} = self::createChild($parent, $className, $properties);
         }
 
@@ -218,14 +218,14 @@ final class Util
         $nested = $parent::$_nested;
         $collection = $nested[$className][0];
 
-        if ($properties !== []) {
+        if ([] !== $properties) {
             $key = self::searchCollectionItem(
-                $parent->{$collection} && $parent->{$collection} !== Generator::UNDEFINED ? $parent->{$collection} : [],
+                $parent->{$collection} && Generator::UNDEFINED !== $parent->{$collection} ? $parent->{$collection} : [],
                 $properties
             );
         }
 
-        if ($key === null) {
+        if (null === $key) {
             $key = self::createCollectionItem($parent, $collection, $className, $properties);
         }
 
@@ -255,12 +255,12 @@ final class Util
         [$collection, $property] = $nested[$className];
 
         $key = self::searchIndexedCollectionItem(
-            $parent->{$collection} && $parent->{$collection} !== Generator::UNDEFINED ? $parent->{$collection} : [],
+            $parent->{$collection} && Generator::UNDEFINED !== $parent->{$collection} ? $parent->{$collection} : [],
             $property,
             $value
         );
 
-        if ($key === false) {
+        if (false === $key) {
             $key = self::createCollectionItem($parent, $collection, $className, [$property => $value]);
         }
 
@@ -310,7 +310,7 @@ final class Util
      */
     public static function createCollectionItem(AbstractAnnotation $parent, string $collection, string $className, array $properties = []): int
     {
-        if ($parent->{$collection} === Generator::UNDEFINED || $parent->{$collection} === null) {
+        if (Generator::UNDEFINED === $parent->{$collection} || null === $parent->{$collection}) {
             $parent->{$collection} = [];
         }
 
@@ -332,7 +332,7 @@ final class Util
     {
         $nesting = self::getNestingIndexes($className);
 
-        if (array_intersect(array_keys($properties), $nesting) !== []) {
+        if ([] !== array_intersect(array_keys($properties), $nesting)) {
             throw new InvalidArgumentException('Nesting Annotations is not supported.'.json_encode(array_intersect(array_keys($properties), $nesting)));
         }
 
@@ -379,7 +379,7 @@ final class Util
         foreach ($propsToCopy as $prop) {
             $value = $parent->{$prop} ?? null;
 
-            if ($value === null) {
+            if (null === $value) {
                 continue;
             }
 
@@ -406,7 +406,7 @@ final class Util
         } elseif (is_a($from, AbstractAnnotation::class)) {
             $json = json_encode($from);
 
-            if ($json === false) {
+            if (false === $json) {
                 throw new InvalidArgumentException('Wrong from data for merge');
             }
             /** @var AbstractAnnotation $from */
@@ -422,13 +422,13 @@ final class Util
      */
     public static function getSchemaPropertyName(Schema $schema, Schema $property): ?string
     {
-        if ($schema->properties === Generator::UNDEFINED) {
+        if (Generator::UNDEFINED === $schema->properties) {
             return null;
         }
 
         foreach ($schema->properties as $schemaProperty) {
             if ($schemaProperty === $property) {
-                return $schemaProperty->property !== Generator::UNDEFINED ? $schemaProperty->property : null;
+                return Generator::UNDEFINED !== $schemaProperty->property ? $schemaProperty->property : null;
             }
         }
 
@@ -440,7 +440,7 @@ final class Util
      */
     public static function modifyAnnotationValue(AbstractAnnotation $parameter, string $property, mixed $value): void
     {
-        if (! Generator::isDefault($parameter->{$property})) {
+        if (!Generator::isDefault($parameter->{$property})) {
             return;
         }
 
@@ -461,7 +461,7 @@ final class Util
         foreach ($annotation::$_nested as $className => $propertyName) {
             if (is_string($propertyName)) {
                 if (array_key_exists($propertyName, $properties)) {
-                    if (! is_bool($properties[$propertyName])) {
+                    if (!is_bool($properties[$propertyName])) {
                         self::mergeChild($annotation, $className, $properties[$propertyName], $overwrite);
                     } elseif ($overwrite || $annotation->{$propertyName} === $defaults[$propertyName]) {
                         // Support for boolean values (for instance for additionalProperties)
@@ -485,11 +485,11 @@ final class Util
         }
 
         foreach ($properties as $propertyName => $value) {
-            if ($propertyName === '$ref') {
+            if ('$ref' === $propertyName) {
                 $propertyName = 'ref';
             }
 
-            if (array_key_exists($propertyName, $defaults) && ! in_array($propertyName, $done, true)) {
+            if (array_key_exists($propertyName, $defaults) && !in_array($propertyName, $done, true)) {
                 self::mergeProperty($annotation, $propertyName, $value, $defaults[$propertyName], $overwrite);
             }
         }
@@ -513,7 +513,7 @@ final class Util
      */
     private static function mergeCollection(AbstractAnnotation $annotation, string $className, ?string $property, array $items, bool $overwrite): void
     {
-        if ($property !== null) {
+        if (null !== $property) {
             foreach ($items as $prop => $value) {
                 $child = self::getIndexedCollectionItem($annotation, $className, (string) $prop);
                 self::merge($child, $value);
@@ -545,15 +545,15 @@ final class Util
      */
     private static function mergeTyped(AbstractAnnotation $annotation, string $propertyName, mixed $type, array $properties, array $defaults, bool $overwrite): void
     {
-        if (is_string($type) && strpos($type, '[') === 0) {
+        if (is_string($type) && str_starts_with($type, '[')) {
             /** @var class-string<AbstractAnnotation> $innerType */
             $innerType = substr($type, 1, -1);
 
-            if (! $annotation->{$propertyName} || $annotation->{$propertyName} === Generator::UNDEFINED) {
+            if (!$annotation->{$propertyName} || Generator::UNDEFINED === $annotation->{$propertyName}) {
                 $annotation->{$propertyName} = [];
             }
 
-            if (! class_exists($innerType)) {
+            if (!class_exists($innerType)) {
                 // type is declared as array in @see AbstractAnnotation::$_types
                 $annotation->{$propertyName} = array_unique(array_merge(
                     $annotation->{$propertyName},
@@ -575,7 +575,7 @@ final class Util
 
     private static function mergeProperty(AbstractAnnotation $annotation, string $propertyName, mixed $value, mixed $default, bool $overwrite): void
     {
-        if ($overwrite === true || $default === $annotation->{$propertyName}) {
+        if (true === $overwrite || $default === $annotation->{$propertyName}) {
             $annotation->{$propertyName} = $value;
         }
     }

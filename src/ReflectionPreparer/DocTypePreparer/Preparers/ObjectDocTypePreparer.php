@@ -32,7 +32,7 @@ class ObjectDocTypePreparer implements DocTypePreparerInterface
 
         $objectType = $docType->getFqsen();
 
-        if ($objectType === null) {
+        if (null === $objectType) {
             return [];
         }
 

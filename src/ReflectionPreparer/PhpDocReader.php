@@ -63,7 +63,7 @@ class PhpDocReader
         $docBlock = $this->getDockBLock($reflectionProperty);
 
         foreach ($docBlock->getTags() as $tag) {
-            if (! $tag instanceof Var_) {
+            if (!$tag instanceof Var_) {
                 continue;
             }
 
@@ -78,7 +78,7 @@ class PhpDocReader
 
         $constructor = $reflectionProperty->getDeclaringClass()->getConstructor();
 
-        if ($constructor === null) {
+        if (null === $constructor) {
             return [];
         }
 
@@ -101,11 +101,11 @@ class PhpDocReader
         $result = [];
 
         foreach ($docBlock->getTags() as $tag) {
-            if (! $tag instanceof Param) {
+            if (!$tag instanceof Param) {
                 continue;
             }
 
-            if ($tag->getVariableName() === null) {
+            if (null === $tag->getVariableName()) {
                 continue;
             }
 
@@ -129,7 +129,7 @@ class PhpDocReader
         $docBlock = $this->getDockBLock($reflectionMethod);
 
         foreach ($docBlock->getTags() as $tag) {
-            if (! $tag instanceof Return_) {
+            if (!$tag instanceof Return_) {
                 continue;
             }
 
@@ -147,8 +147,8 @@ class PhpDocReader
 
     private function getDockBLock(ReflectionClass|ReflectionMethod|ReflectionProperty $reflection): DocBlock
     {
-        if ($reflection->getDocComment() === false) {
-            return new DocBlock;
+        if (false === $reflection->getDocComment()) {
+            return new DocBlock();
         }
 
         return $this->docBlockFactory->create($reflection);

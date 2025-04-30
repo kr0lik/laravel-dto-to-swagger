@@ -32,13 +32,13 @@ class EnumDescriber implements PropertyTypeDescriberInterface
     {
         $class = $types[0]->getClassName();
 
-        if ($class === null) {
+        if (null === $class) {
             return;
         }
 
         $path = $this->openApiRegister->findSchemaPath($class);
 
-        if ($path !== null) {
+        if (null !== $path) {
             $property->ref = $path;
 
             return;
@@ -53,9 +53,9 @@ class EnumDescriber implements PropertyTypeDescriberInterface
 
     public function supports(Type ...$types): bool
     {
-        return count($types) === 1
-            && $types[0]->getBuiltinType() === Type::BUILTIN_TYPE_OBJECT
-            && $types[0]->getClassName() !== null
+        return 1 === count($types)
+            && Type::BUILTIN_TYPE_OBJECT === $types[0]->getBuiltinType()
+            && null !== $types[0]->getClassName()
             && is_a($types[0]->getClassName(), BackedEnum::class, true);
     }
 
@@ -66,7 +66,7 @@ class EnumDescriber implements PropertyTypeDescriberInterface
     {
         $schema = new Schema([]);
 
-        if ($reflectionEnum->getBackingType() !== null) {
+        if (null !== $reflectionEnum->getBackingType()) {
             $this->propertyDescriber->describe($schema, $context, ...$this->refTypePreparer->prepare($reflectionEnum->getBackingType()));
         }
 

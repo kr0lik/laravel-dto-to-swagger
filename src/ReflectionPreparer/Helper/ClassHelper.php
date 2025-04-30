@@ -18,7 +18,7 @@ class ClassHelper
 
         $reflectionParentClass = $reflectionClass->getParentClass();
 
-        if ($reflectionParentClass === false) {
+        if (false === $reflectionParentClass) {
             return false;
         }
 
@@ -36,7 +36,7 @@ class ClassHelper
 
         $reflectionParentClass = $reflectionClass->getParentClass();
 
-        if ($reflectionParentClass === false) {
+        if (false === $reflectionParentClass) {
             return;
         }
 
@@ -49,7 +49,7 @@ class ClassHelper
     public static function getVisiblePropertiesRecursively(ReflectionClass $reflectionClass): iterable
     {
         foreach ($reflectionClass->getProperties() as $reflectionProperty) {
-            if (! self::isVisible($reflectionClass, $reflectionProperty)) {
+            if (!self::isVisible($reflectionClass, $reflectionProperty)) {
                 continue;
             }
 
@@ -58,7 +58,7 @@ class ClassHelper
 
         $reflectionParentClass = $reflectionClass->getParentClass();
 
-        if ($reflectionParentClass === false) {
+        if (false === $reflectionParentClass) {
             return;
         }
 

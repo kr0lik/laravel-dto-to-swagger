@@ -47,7 +47,7 @@ class RequestDescriber implements OperationDescriberInterface
         $this->addFromAttributes($operation, $reflectionMethod);
 
         foreach ($this->reflectionPreparer->getArgumentTypes($reflectionMethod) as $types) {
-            if (count($types) === 1 && $types[0]->getClassName() !== null && is_subclass_of($types[0]->getClassName(), JsonRequestInterface::class)) {
+            if (1 === count($types) && null !== $types[0]->getClassName() && is_subclass_of($types[0]->getClassName(), JsonRequestInterface::class)) {
                 $jsonContent = new Schema([]);
 
                 $context = [];
@@ -55,7 +55,7 @@ class RequestDescriber implements OperationDescriberInterface
 
                 $fileUploadType = $this->openApiRegister->getConfig()->fileUploadType ?? '';
 
-                if ($fileUploadType === '') {
+                if ('' === $fileUploadType) {
                     $context[ObjectDescriber::SKIP_TYPES_CONTEXT] = [$fileUploadType];
                 }
 
@@ -75,7 +75,7 @@ class RequestDescriber implements OperationDescriberInterface
 
                 $requestErrorResponseSchemas = $this->openApiRegister->getConfig()->requestErrorResponseSchemas ?? [];
 
-                if ($requestErrorResponseSchemas !== []) {
+                if ([] !== $requestErrorResponseSchemas) {
                     Util::merge($operation, ['responses' => $requestErrorResponseSchemas]);
                 }
 
@@ -111,7 +111,7 @@ class RequestDescriber implements OperationDescriberInterface
     {
         $class = $type->getClassName();
 
-        if ($class === null) {
+        if (null === $class) {
             return;
         }
 
@@ -124,11 +124,11 @@ class RequestDescriber implements OperationDescriberInterface
                 if ($attributeInstance instanceof Parameter) {
                     $name = $attributeInstance->name;
 
-                    if ($name === Generator::UNDEFINED || $name === '') {
+                    if (Generator::UNDEFINED === $name || '' === $name) {
                         $name = NameHelper::getName($reflectionProperty);
                     }
 
-                    if ($attributeInstance->in === Generator::UNDEFINED || $attributeInstance->in === null || $attributeInstance->in === '') {
+                    if (Generator::UNDEFINED === $attributeInstance->in || null === $attributeInstance->in || '' === $attributeInstance->in) {
                         $attributeInstance->in = QueryParameterDescriber::IN;
                     }
 
@@ -158,7 +158,7 @@ class RequestDescriber implements OperationDescriberInterface
     {
         $fileUploadProperties = $this->searchFIleUploadProperties($type);
 
-        if ($fileUploadProperties === []) {
+        if ([] === $fileUploadProperties) {
             return;
         }
 
@@ -187,13 +187,13 @@ class RequestDescriber implements OperationDescriberInterface
     {
         $fileUploadType = $this->openApiRegister->getConfig()->fileUploadType ?? '';
 
-        if ($fileUploadType === '') {
+        if ('' === $fileUploadType) {
             return [];
         }
 
         $class = $type->getClassName();
 
-        if ($class === null) {
+        if (null === $class) {
             return [];
         }
 
@@ -222,7 +222,7 @@ class RequestDescriber implements OperationDescriberInterface
 
     private function isNotEmpty(Schema $schema): bool
     {
-        return ($schema->properties !== Generator::UNDEFINED && $schema->properties !== [])
-            || $schema->ref !== Generator::UNDEFINED;
+        return (Generator::UNDEFINED !== $schema->properties && [] !== $schema->properties)
+            || Generator::UNDEFINED !== $schema->ref;
     }
 }

@@ -39,12 +39,12 @@ class ResponseDescriber implements OperationDescriberInterface
 
         $returnTypes = $this->reflectionPreparer->getReturnTypes($reflectionMethod);
 
-        if ($returnTypes === null) {
+        if (null === $returnTypes) {
             return;
         }
 
         foreach ($returnTypes as $returnType) {
-            if ($returnType->getClassName() === null) {
+            if (null === $returnType->getClassName()) {
                 continue;
             }
 

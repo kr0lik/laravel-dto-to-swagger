@@ -34,11 +34,11 @@ class ArrayRefTypePreparer implements RefTypePreparerInterface
 
     public function supports(ReflectionType $reflectionType): bool
     {
-        if (! $reflectionType instanceof ReflectionNamedType) {
+        if (!$reflectionType instanceof ReflectionNamedType) {
             return false;
         }
 
-        if ($reflectionType->getName() === Type::BUILTIN_TYPE_ARRAY) {
+        if (Type::BUILTIN_TYPE_ARRAY === $reflectionType->getName()) {
             return true;
         }
 

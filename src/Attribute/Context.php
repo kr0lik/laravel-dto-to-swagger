@@ -24,6 +24,6 @@ class Context implements JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        return array_filter(get_object_vars($this), static fn (mixed $var): bool => $var !== null);
+        return array_filter(get_object_vars($this), static fn (mixed $var): bool => null !== $var);
     }
 }

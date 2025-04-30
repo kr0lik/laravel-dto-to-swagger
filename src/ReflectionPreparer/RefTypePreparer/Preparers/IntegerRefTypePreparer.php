@@ -28,10 +28,10 @@ class IntegerRefTypePreparer implements RefTypePreparerInterface
 
     public function supports(ReflectionType $reflectionType): bool
     {
-        if (! $reflectionType instanceof ReflectionNamedType) {
+        if (!$reflectionType instanceof ReflectionNamedType) {
             return false;
         }
 
-        return $reflectionType->getName() === Type::BUILTIN_TYPE_INT;
+        return Type::BUILTIN_TYPE_INT === $reflectionType->getName();
     }
 }

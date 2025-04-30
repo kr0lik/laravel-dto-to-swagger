@@ -50,7 +50,7 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
     {
         $class = $types[0]->getClassName();
 
-        if ($class === null || $class === stdClass::class) {
+        if (null === $class || stdClass::class === $class) {
             $property->type = 'object';
 
             return;
@@ -58,7 +58,7 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
         $path = $this->openApiRegister->findSchemaPath($class);
 
-        if ($path !== null) {
+        if (null !== $path) {
             $property->ref = $path;
 
             return;
@@ -68,7 +68,7 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
         $schema = $this->getSchema($reflectionClass, $context);
 
-        if ($schema === null) {
+        if (null === $schema) {
             return;
         }
 
@@ -77,11 +77,11 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
     public function supports(Type ...$types): bool
     {
-        return count($types) === 1
-            && $types[0]->getBuiltinType() === Type::BUILTIN_TYPE_OBJECT
-            && $types[0]->getClassName() !== null
-            && ! is_a($types[0]->getClassName(), DateTimeInterface::class, true)
-            && ! is_a($types[0]->getClassName(), BackedEnum::class, true);
+        return 1 === count($types)
+            && Type::BUILTIN_TYPE_OBJECT === $types[0]->getBuiltinType()
+            && null !== $types[0]->getClassName()
+            && !is_a($types[0]->getClassName(), DateTimeInterface::class, true)
+            && !is_a($types[0]->getClassName(), BackedEnum::class, true);
     }
 
     /**
@@ -95,8 +95,8 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
         $this->fillProperties($schema, $reflectionClass, $context);
 
-        $isEmptySchema = $schema->properties === Generator::UNDEFINED
-            || $schema->properties === [];
+        $isEmptySchema = Generator::UNDEFINED === $schema->properties
+            || [] === $schema->properties;
 
         if ($isEmptySchema) {
             return null;
@@ -119,24 +119,24 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
             $propertySchema = $this->getPropertySchema($reflectionProperty, $context);
 
-            if ($propertySchema === null) {
+            if (null === $propertySchema) {
                 continue;
             }
 
             $description = $this->phpDocReader->getDescription($reflectionProperty);
 
-            if ($description !== '') {
+            if ('' !== $description) {
                 $propertySchema->description = $description;
             }
 
-            if ($schema->properties === Generator::UNDEFINED) {
+            if (Generator::UNDEFINED === $schema->properties) {
                 $schema->properties = [];
             }
 
             $schema->properties[] = $propertySchema;
 
             if ($this->isRequired($reflectionProperty)) {
-                if ($schema->required === Generator::UNDEFINED) {
+                if (Generator::UNDEFINED === $schema->required) {
                     $schema->required = [];
                 }
 
@@ -145,7 +145,7 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
 
             $defaultValue = $this->getDefaultValue($reflectionProperty);
 
-            if ($defaultValue !== null) {
+            if (null !== $defaultValue) {
                 if (is_object($defaultValue) && is_a($defaultValue, BackedEnum::class, true)) {
                     $defaultValue = $defaultValue->value;
                 }
@@ -162,7 +162,7 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
      */
     private function getPropertySchema(ReflectionProperty $reflectionProperty, array $context): ?Property
     {
-        $propertySchema = new Property;
+        $propertySchema = new Property();
 
         foreach ($reflectionProperty->getAttributes() as $attribute) {
             if ($this->isShouldSkipByAttribute($attribute, $context)) {
@@ -215,16 +215,16 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
     private function isShouldSkipType(ReflectionProperty $reflectionProperty, array $context): bool
     {
         if (
-            ! array_key_exists(self::SKIP_TYPES_CONTEXT, $context)
-            || ! is_array($context[self::SKIP_TYPES_CONTEXT])
-            || $context[self::SKIP_TYPES_CONTEXT] === []
+            !array_key_exists(self::SKIP_TYPES_CONTEXT, $context)
+            || !is_array($context[self::SKIP_TYPES_CONTEXT])
+            || [] === $context[self::SKIP_TYPES_CONTEXT]
         ) {
             return false;
         }
 
         $reflectionType = $reflectionProperty->getType();
 
-        if (! $reflectionType instanceof ReflectionNamedType) {
+        if (!$reflectionType instanceof ReflectionNamedType) {
             return false;
         }
 
@@ -247,9 +247,9 @@ class ObjectDescriber implements PropertyTypeDescriberInterface
     private function isShouldSkipByAttribute(ReflectionAttribute $reflectionAttribute, array $context): bool
     {
         if (
-            ! array_key_exists(self::SKIP_ATTRIBUTES_CONTEXT, $context)
-            || ! is_array($context[self::SKIP_ATTRIBUTES_CONTEXT])
-            || $context[self::SKIP_ATTRIBUTES_CONTEXT] === []
+            !array_key_exists(self::SKIP_ATTRIBUTES_CONTEXT, $context)
+            || !is_array($context[self::SKIP_ATTRIBUTES_CONTEXT])
+            || [] === $context[self::SKIP_ATTRIBUTES_CONTEXT]
         ) {
             return false;
         }

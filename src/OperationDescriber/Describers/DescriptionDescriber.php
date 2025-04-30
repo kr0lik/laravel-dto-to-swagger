@@ -20,7 +20,7 @@ class DescriptionDescriber implements OperationDescriberInterface
     {
         $description = $this->phpDocReader->getDescription($reflectionMethod);
 
-        if ($description !== '') {
+        if ('' !== $description) {
             $operation->description = $description;
         }
 

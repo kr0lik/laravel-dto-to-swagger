@@ -17,9 +17,9 @@
     "zircote/swagger-php": "^4.0|^5.0"
   },
   "require-dev": {
-    "icanhazstring/composer-unused": "^0.8.11",
-    "kr0lik/laravel-phpstan-rules": "^1.0",
-    "laravel/pint": "^1.0"
+    "icanhazstring/composer-unused": "^0.8",
+    "kr0lik/php-cs-fixer": "^2.0",
+    "kr0lik/phpstan-rules": "^3.0"
   },
   "autoload": {
     "psr-4": {
@@ -39,13 +39,12 @@
     }
   },
   "suggest": {
-    "spatie/laravel-data": "^3.11"
+    "spatie/laravel-data": "^3.0"
   },
   "config": {
     "preferred-install": {
       "*": "dist"
     },
-    "bin-dir": "bin",
     "sort-packages": true
   }
 }

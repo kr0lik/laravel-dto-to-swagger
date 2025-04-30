@@ -46,7 +46,7 @@ class HeaderParameterDescriber implements OperationDescriberInterface
         $this->addFromAttributes($operation, $reflectionMethod);
 
         foreach ($this->reflectionPreparer->getArgumentTypes($reflectionMethod) as $types) {
-            if (count($types) === 1 && $types[0]->getClassName() !== null && is_subclass_of($types[0]->getClassName(), HeaderRequestInterface::class)) {
+            if (1 === count($types) && null !== $types[0]->getClassName() && is_subclass_of($types[0]->getClassName(), HeaderRequestInterface::class)) {
                 $reflectionClass = new ReflectionClass($types[0]->getClassName());
 
                 $this->addHeaderParametersFromObject($operation, $reflectionClass);
@@ -62,7 +62,7 @@ class HeaderParameterDescriber implements OperationDescriberInterface
         foreach ($reflectionMethod->getAttributes() as $attribute) {
             $attributeInstance = $attribute->newInstance();
 
-            if ($attributeInstance instanceof Parameter && $attributeInstance->in === self::IN) {
+            if ($attributeInstance instanceof Parameter && self::IN === $attributeInstance->in) {
                 $newParameter = Util::getOperationParameter($operation, $attributeInstance->name, $attributeInstance->in);
                 Util::merge($newParameter, $attributeInstance);
             }
@@ -99,11 +99,11 @@ class HeaderParameterDescriber implements OperationDescriberInterface
             if ($attributeInstance instanceof Parameter) {
                 $name = $attributeInstance->name;
 
-                if ($name === Generator::UNDEFINED || $name === '') {
+                if (Generator::UNDEFINED === $name || '' === $name) {
                     $name = NameHelper::getName($reflectionProperty);
                 }
 
-                if ($attributeInstance->in === Generator::UNDEFINED || $attributeInstance->in === null || $attributeInstance->in === '') {
+                if (Generator::UNDEFINED === $attributeInstance->in || null === $attributeInstance->in || '' === $attributeInstance->in) {
                     $attributeInstance->in = self::IN;
                 }
 
