@@ -55,7 +55,7 @@ class RequestDescriber implements OperationDescriberInterface
 
                 $fileUploadType = $this->openApiRegister->getConfig()->fileUploadType ?? '';
 
-                if ('' === $fileUploadType) {
+                if ('' !== $fileUploadType) {
                     $context[ObjectDescriber::SKIP_TYPES_CONTEXT] = [$fileUploadType];
                 }
 
