@@ -462,7 +462,7 @@ docker run -v .:/app --rm composer:2.2.20 vendor/bin/php-cs-fixer fix
 
 docker run -v .:/app --rm composer:2.2.20 vendor/bin/phpstan analyse
 
-docker run -v .:/app --rm composer:2.2.20 vendor/bin/vendor/bin/composer-unused
+docker run -v .:/app --rm composer:2.2.20 vendor/bin/composer-unused
 
 
 ## See Also
