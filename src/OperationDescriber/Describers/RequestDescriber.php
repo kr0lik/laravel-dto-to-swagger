@@ -94,9 +94,9 @@ class RequestDescriber implements OperationDescriberInterface
             $attributeInstance = $attribute->newInstance();
 
             if ($attributeInstance instanceof RequestBody) {
-                $attributeData = $attributeInstance->jsonSerialize();
+                $attributeData = (array) $attributeInstance->jsonSerialize();
 
-                assert(is_array($attributeData));
+                assert(is_array($attributeData) && !empty($attributeData));
 
                 Util::createChild($operation, RequestBody::class, $attributeData);
             }
