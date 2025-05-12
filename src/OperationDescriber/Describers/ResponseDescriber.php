@@ -80,7 +80,9 @@ class ResponseDescriber implements OperationDescriberInterface
             if ($attributeInstance instanceof Response) {
                 $attributeData = (array) $attributeInstance->jsonSerialize();
 
-                assert(is_array($attributeData) && !empty($attributeData));
+                if ([] === $attributeData) {
+                    return;
+                }
 
                 Util::createCollectionItem($operation, 'responses', Response::class, $attributeData);
             }
