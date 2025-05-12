@@ -34,3 +34,8 @@ parameters:
           paths:
                 - src/Dto/*
                 - src/Attribute/*
+        -
+          message: '#Using \(array\) is discouraged, please avoid using that#'
+          paths:
+                - src/OperationDescriber/Describers/RequestDescriber.php
+                - src/OperationDescriber/Describers/ResponseDescriber.php
