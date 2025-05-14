@@ -113,7 +113,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
             }
 
             Util::merge($parameter, [
-                'required' => $this->isRequired($reflectionProperty),
+                'required' => Generator::UNDEFINED !== $parameter->required ? $parameter->required : $this->isRequired($reflectionProperty),
                 'schema' => $this->getSchema($reflectionProperty),
             ], true);
 
@@ -149,7 +149,7 @@ class QueryParameterDescriber implements OperationDescriberInterface
             $parameter = $this->getParameter($operation, $reflectionProperty);
 
             Util::merge($parameter, [
-                'required' => $this->isRequired($reflectionProperty),
+                'required' => Generator::UNDEFINED !== $parameter->required ? $parameter->required : $this->isRequired($reflectionProperty),
                 'schema' => $this->getSchema($reflectionProperty),
                 'name' => $this->buildNestedName(array_merge($nestedNames, [$parameter->name])),
             ], true);

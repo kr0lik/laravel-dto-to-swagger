@@ -78,7 +78,7 @@ class HeaderParameterDescriber implements OperationDescriberInterface
             $parameter = $this->getParameter($operation, $reflectionProperty);
 
             Util::merge($parameter, [
-                'required' => $this->isRequired($reflectionProperty),
+                'required' => Generator::UNDEFINED !== $parameter->required ? $parameter->required : $this->isRequired($reflectionProperty),
                 'schema' => $this->getSchema($reflectionProperty),
             ], true);
 

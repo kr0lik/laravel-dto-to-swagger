@@ -134,7 +134,10 @@ class RequestDescriber implements OperationDescriberInterface
                         $attributeInstance->in = QueryParameterDescriber::IN;
                     }
 
-                    if ($this->isRequired($reflectionProperty)) {
+                    /** @var bool|string $attributeInstanceRequired */
+                    $attributeInstanceRequired = $attributeInstance->required;
+
+                    if (Generator::UNDEFINED === $attributeInstanceRequired && $this->isRequired($reflectionProperty)) {
                         $attributeInstance->required = true;
                     }
 

@@ -24,12 +24,6 @@ parameters:
           message: '#Variable property access on OpenApi#'
           path: src/Helper/Util.php
         -
-          message: '#Call to function is_subclass_of\(\) with object and class-string will always evaluate to true#'
-          path: src/PropertyTypeDescriber/Describers/ObjectDescriber.php
-        -
-          message: '#Unreachable statement - code above always terminates#'
-          path: src/PropertyTypeDescriber/Describers/ObjectDescriber.php
-        -
           message: '#Constructor in .+ has parameter .+ with default value#'
           paths:
                 - src/Dto/*
