@@ -14,6 +14,7 @@ use Kr0lik\DtoToSwagger\Trait\IsRequiredTrait;
 use OpenApi\Annotations\Operation;
 use OpenApi\Annotations\Parameter;
 use OpenApi\Annotations\Schema;
+use OpenApi\Generator;
 use ReflectionMethod;
 
 class PathParameterDescriber implements OperationDescriberInterface
@@ -39,18 +40,20 @@ class PathParameterDescriber implements OperationDescriberInterface
                 continue;
             }
 
+            $parameter = Util::getOperationParameter($operation, $name, self::IN);
+            $parameter->required = true;
+
+            if (null !== $parameter->schema && Generator::UNDEFINED !== $parameter->schema) {
+                continue;
+            }
+
             $schema = new Schema([]);
 
             $currentPropertyContext = $routeContext->inPathParametersPerName[$name];
 
             $this->propertyDescriber->describe($schema, $currentPropertyContext, ...$types);
 
-            $parameter = Util::getOperationParameter($operation, $name, self::IN);
-
-            Util::merge($parameter, [
-                'required' => true,
-                'schema' => $schema,
-            ], true);
+            $parameter->schema = $schema;
         }
     }
 

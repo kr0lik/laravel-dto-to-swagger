@@ -288,7 +288,8 @@ class TextController extends Controller
      * @Response(
      *     response=300, 
      *     description="response-from-attribute"
-     * )
+     * ) 
+     * #[Parameter(name: "multipleVar", in: 'path', schema: new Schema(type: 'string'))]
      */
     public function postAction(RequestDto $requestDto, int|string|null $multipleVar, ?array $arrayOptionalVar = []): ResponseDto
     {

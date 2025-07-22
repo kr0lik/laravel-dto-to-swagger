@@ -11,7 +11,9 @@ use App\Dto\Response\ResponseDto;
 use DateTimeImmutable;
 use Illuminate\Routing\Controller;
 use Kr0lik\ParamConverter\Annotation\ParamConverter;
+use OpenApi\Attributes\Parameter;
 use OpenApi\Attributes\Response;
+use OpenApi\Attributes\Schema;
 use OpenApi\Attributes\Tag;
 use Spatie\RouteAttributes\Attributes\Route;
 use Spatie\RouteAttributes\Attributes\WhereUlid;
@@ -33,6 +35,7 @@ class TextController extends Controller
     #[Route(['get'], 'get-route/{uuid}', middleware: ['api'])]
     #[WhereUlid('uuid')]
     #[ParamConverter('queryRequest', QueryRequest::class, options: ['source' => 'query'])]
+    #[Parameter(name: "uuid", in: 'path', schema: new Schema(ref: '#/components/schemas/UUID'))]
     public function getAction(QueryRequest $queryRequest, HeadRequestDto $headers, string $uuid): ResponseDto
     {
         return new ResponseDto(1, 'string', new DateTimeImmutable);

@@ -23,9 +23,9 @@ class Security extends AbstractAnnotation
      * @param string[]             $scopes
      */
     public function __construct(
-        readonly array $properties = [],
-        readonly ?string $name = null,
-        readonly array $scopes = []
+        public readonly array $properties = [],
+        public readonly ?string $name = null,
+        public readonly array $scopes = []
     ) {
         parent::__construct($properties + [
             'name' => $name,

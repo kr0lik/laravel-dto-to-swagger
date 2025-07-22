@@ -14,8 +14,8 @@ class Wrap
      * @param array<string, Property> $properties
      */
     public function __construct(
-        readonly string $ref,
-        readonly string $to,
-        readonly array $properties = [],
+        public readonly string $ref,
+        public readonly string $to,
+        public readonly array $properties = [],
     ) {}
 }

@@ -14,9 +14,9 @@ class Context implements JsonSerializable
      * @param string[]|null $enum
      */
     public function __construct(
-        readonly ?string $format = null,
-        readonly ?string $pattern = null,
-        readonly ?array $enum = null,
+        public readonly ?string $format = null,
+        public readonly ?string $pattern = null,
+        public readonly ?array $enum = null,
     ) {}
 
     /**

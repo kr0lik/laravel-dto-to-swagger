@@ -10,6 +10,6 @@ use Attribute;
 class Name
 {
     public function __construct(
-        readonly string $name,
+        public readonly string $name,
     ) {}
 }
