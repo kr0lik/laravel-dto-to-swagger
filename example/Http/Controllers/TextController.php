@@ -8,6 +8,7 @@ use App\Dto\Request\HeadRequestDto;
 use App\Dto\Request\QueryRequest;
 use App\Dto\Request\RequestDto;
 use App\Dto\Response\ResponseDto;
+use App\Exception\NotFoundException;
 use DateTimeImmutable;
 use Illuminate\Routing\Controller;
 use Kr0lik\ParamConverter\Annotation\ParamConverter;
@@ -32,12 +33,18 @@ class TextController extends Controller
         return new ResponseDto(1, 'string', new DateTimeImmutable);
     }
 
+    /**
+     * @throws NotFoundException
+     */
     #[Route(['get'], 'get-route/{uuid}', middleware: ['api'])]
     #[WhereUlid('uuid')]
     #[ParamConverter('queryRequest', QueryRequest::class, options: ['source' => 'query'])]
     #[Parameter(name: "uuid", in: 'path', schema: new Schema(ref: '#/components/schemas/UUID'))]
     public function getAction(QueryRequest $queryRequest, HeadRequestDto $headers, string $uuid): ResponseDto
     {
+        if (rand(1, 2) === 1) {
+            throw new NotFoundException();
+        }
         return new ResponseDto(1, 'string', new DateTimeImmutable);
     }
 }

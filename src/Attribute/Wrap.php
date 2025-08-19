@@ -15,7 +15,7 @@ class Wrap
      */
     public function __construct(
         public readonly string $ref,
-        public readonly string $to,
+        public readonly string $to = '',
         public readonly array $properties = [],
     ) {}
 }
