@@ -10,6 +10,7 @@ use Illuminate\Support\ServiceProvider;
 use Kr0lik\DtoToSwagger\Command\SwaggerGenerator;
 use Kr0lik\DtoToSwagger\Dto\ConfigDto;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\DescriptionDescriber;
+use Kr0lik\DtoToSwagger\OperationDescriber\Describers\ExceptionDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\HeaderParameterDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\PathParameterDescriber;
 use Kr0lik\DtoToSwagger\OperationDescriber\Describers\QueryParameterDescriber;
@@ -54,6 +55,7 @@ use Kr0lik\DtoToSwagger\ReflectionPreparer\RefTypePreparer\RefTypePreparer;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\RefTypePreparer\RefTypePreparerInterface;
 use Kr0lik\DtoToSwagger\Register\OpenApiRegister;
 use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Types\ContextFactory;
 use Psr\Container\ContainerExceptionInterface;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
@@ -178,10 +180,12 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
             $docTypePreparer = $app->make(DocTypePreparer::class);
             /** @var DocBlockFactory $docBlockFactory */
             $docBlockFactory = DocBlockFactory::createInstance();
+            $contextFactory = new ContextFactory();
 
             return new PhpDocReader(
                 $docTypePreparer,
-                $docBlockFactory
+                $docBlockFactory,
+                $contextFactory
             );
         });
     }
@@ -206,6 +210,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
                 HeaderParameterDescriber::class,
                 RequestDescriber::class,
                 ResponseDescriber::class,
+                ExceptionDescriber::class,
             ];
         });
 

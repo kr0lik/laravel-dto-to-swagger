@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kr0lik\DtoToSwagger\ReflectionPreparer;
 
+use Kr0lik\DtoToSwagger\Contract\JsonErrorInterface;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\DocTypePreparer\DocTypePreparer;
 use Kr0lik\DtoToSwagger\ReflectionPreparer\DocTypePreparer\Preparers\ObjectDocTypePreparer;
 use phpDocumentor\Reflection\DocBlock;
@@ -13,6 +14,8 @@ use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Type as DocType;
+use phpDocumentor\Reflection\Types\Context;
+use phpDocumentor\Reflection\Types\ContextFactory;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -23,6 +26,7 @@ class PhpDocReader
     public function __construct(
         private DocTypePreparer $docTypePreparer,
         private DocBlockFactory $docBlockFactory,
+        private ContextFactory $contextFactory,
     ) {}
 
     public function getDescription(ReflectionMethod|ReflectionProperty $reflection): string
@@ -32,6 +36,30 @@ class PhpDocReader
         $description = $docBlock->getSummary();
 
         return trim($description);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getThrows(ReflectionMethod|ReflectionProperty $reflection): array
+    {
+        $docBlock = $this->getDockBLock($reflection, true);
+
+        $tags = $docBlock->getTagsWithTypeByName('throws');
+        $result = [];
+
+        foreach ($tags as $tag) {
+            $throwClassName = (string) $tag->getType();
+
+            if (class_exists($throwClassName)
+                && is_array(class_implements($throwClassName))
+                && in_array(JsonErrorInterface::class, class_implements($throwClassName), true)
+            ) {
+                $result[] = trim($throwClassName, '\\');
+            }
+        }
+
+        return $result;
     }
 
     public function isDeprecated(ReflectionMethod|ReflectionProperty $reflection): bool
@@ -145,12 +173,27 @@ class PhpDocReader
         return null;
     }
 
-    private function getDockBLock(ReflectionClass|ReflectionMethod|ReflectionProperty $reflection): DocBlock
+    private function getDockBLock(ReflectionClass|ReflectionMethod|ReflectionProperty $reflection, bool $withContext = false): DocBlock
     {
-        if (false === $reflection->getDocComment()) {
-            return new DocBlock();
+        $context = null;
+
+        if ($withContext) {
+            $context = $this->getContext($reflection);
         }
 
-        return $this->docBlockFactory->create($reflection);
+        if (false === $reflection->getDocComment()) {
+            return new DocBlock('', null, [], $context);
+        }
+
+        return $this->docBlockFactory->create($reflection, $context);
+    }
+
+    private function getContext(ReflectionClass|ReflectionMethod|ReflectionProperty $reflection): Context
+    {
+        if ($reflection instanceof ReflectionClass) {
+            return $this->contextFactory->createFromReflector($reflection);
+        }
+
+        return $this->contextFactory->createFromReflector($reflection->getDeclaringClass());
     }
 }
