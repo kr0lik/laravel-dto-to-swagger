@@ -274,7 +274,7 @@ final class Util
      * @param array<string|int, AbstractAnnotation> $collection
      * @param array<string, mixed>                  $properties
      */
-    public static function searchCollectionItem(array $collection, array $properties): null|int|string
+    public static function searchCollectionItem(array $collection, array $properties): int|string|null
     {
         foreach ($collection as $i => $child) {
             foreach ($properties as $k => $prop) {

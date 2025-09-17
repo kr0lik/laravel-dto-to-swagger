@@ -20,7 +20,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 
-class ExceptionDescriber implements OperationDescriberInterface
+class ThrowsDescriber implements OperationDescriberInterface
 {
     public function __construct(
         private PropertyTypeDescriber $propertyDescriber,
