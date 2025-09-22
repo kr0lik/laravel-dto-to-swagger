@@ -7,6 +7,7 @@ namespace App\Dto\Request;
 use App\Enum\StringEnum;
 use DateTimeImmutable;
 use Illuminate\Support\Collection;
+use Illuminate\Http\UploadedFile;
 use Kr0lik\DtoToSwagger\Attribute\Context;
 use Kr0lik\DtoToSwagger\Attribute\Name;
 use Kr0lik\DtoToSwagger\Contract\JsonRequestInterface;
@@ -45,5 +46,6 @@ final class RequestDto implements JsonRequestInterface
         readonly StringEnum $enum,
         readonly UploadedFile $uploadedFile,
         readonly Collection $collectionOfString,
+        readonly UploadedFile $file,
     ) {}
 }
