@@ -47,43 +47,66 @@ class RequestDescriber implements OperationDescriberInterface
         $this->addFromAttributes($operation, $reflectionMethod);
 
         foreach ($this->reflectionPreparer->getArgumentTypes($reflectionMethod) as $types) {
-            if (1 === count($types) && null !== $types[0]->getClassName() && is_subclass_of($types[0]->getClassName(), JsonRequestInterface::class)) {
-                $jsonContent = new Schema([]);
-
-                $context = [];
-                $context[ObjectDescriber::SKIP_ATTRIBUTES_CONTEXT] = [Parameter::class];
-
-                $fileUploadType = $this->openApiRegister->getConfig()->fileUploadType ?? '';
-
-                if ('' !== $fileUploadType) {
-                    $context[ObjectDescriber::SKIP_TYPES_CONTEXT] = [$fileUploadType];
-                }
-
-                $this->propertyDescriber->describe($jsonContent, $context, ...$types);
-
-                if ($this->isNotEmpty($jsonContent)) {
-                    $request = Util::getChild($operation, RequestBody::class);
-
-                    Util::merge($request, [
-                        'content' => [
-                            'application/json' => [
-                                'schema' => $jsonContent,
-                            ],
-                        ],
-                    ], true);
-                }
-
-                $requestErrorResponseSchemas = $this->openApiRegister->getConfig()->requestErrorResponseSchemas ?? [];
-
-                if ([] !== $requestErrorResponseSchemas) {
-                    Util::merge($operation, ['responses' => $requestErrorResponseSchemas]);
-                }
-
-                $this->searchAndDescribeParameters($operation, $types[0]);
-                $this->searchAndDescribeFIleUploadType($operation, $types[0]);
+            if (1 !== count($types) || null === $types[0]->getClassName() || !is_subclass_of($types[0]->getClassName(), JsonRequestInterface::class)) {
+                continue;
             }
+
+            $contentType = 'application/json';
+            $mainSchema = new Schema([]);
+
+            $context = [];
+            $context[ObjectDescriber::SKIP_ATTRIBUTES_CONTEXT] = [Parameter::class];
+
+            $fileUploadType = $this->openApiRegister->getConfig()->fileUploadType ?? '';
+
+            if ('' !== $fileUploadType) {
+                $context[ObjectDescriber::SKIP_TYPES_CONTEXT] = [$fileUploadType];
+            }
+
+            $this->propertyDescriber->describe($mainSchema, $context, ...$types);
+
+            $fileUploadProperties = $this->searchFileUploadProperties($types[0]);
+
+            if ([] !== $fileUploadProperties) {
+                $contentType = 'multipart/form-data';
+
+                $multipartSchema = new Schema([
+                    'type' => 'object',
+                    'properties' => $fileUploadProperties,
+                ]);
+
+                if ($this->isNotEmpty($mainSchema)) {
+                    $mainSchema = new Schema(["allOf" => [
+                        $mainSchema,
+                        $multipartSchema,
+                    ]]);
+                } else {
+                    $mainSchema = $multipartSchema;
+                }
+            }
+
+            if ($this->isNotEmpty($mainSchema)) {
+                $request = Util::getChild($operation, RequestBody::class);
+
+                Util::merge($request, [
+                    'content' => [
+                        $contentType => [
+                            'schema' => $mainSchema,
+                        ],
+                    ],
+                ], true);
+            }
+
+            $requestErrorResponseSchemas = $this->openApiRegister->getConfig()->requestErrorResponseSchemas ?? [];
+
+            if ([] !== $requestErrorResponseSchemas) {
+                Util::merge($operation, ['responses' => $requestErrorResponseSchemas]);
+            }
+
+            $this->searchAndDescribeParameters($operation, $types[0]);
         }
     }
+
 
     /**
      * @throws InvalidArgumentException
@@ -123,64 +146,38 @@ class RequestDescriber implements OperationDescriberInterface
             foreach ($reflectionProperty->getAttributes() as $reflectionAttribute) {
                 $attributeInstance = $reflectionAttribute->newInstance();
 
-                if ($attributeInstance instanceof Parameter) {
-                    $name = $attributeInstance->name;
-
-                    if (Generator::UNDEFINED === $name || '' === $name) {
-                        $name = NameHelper::getName($reflectionProperty);
-                    }
-
-                    if (Generator::UNDEFINED === $attributeInstance->in || null === $attributeInstance->in || '' === $attributeInstance->in) {
-                        $attributeInstance->in = QueryParameterDescriber::IN;
-                    }
-
-                    /** @var bool|string $attributeInstanceRequired */
-                    $attributeInstanceRequired = $attributeInstance->required;
-
-                    if (Generator::UNDEFINED === $attributeInstanceRequired && $this->isRequired($reflectionProperty)) {
-                        $attributeInstance->required = true;
-                    }
-
-                    $newParameter = Util::getOperationParameter($operation, $name, $attributeInstance->in);
-                    Util::merge($newParameter, $attributeInstance);
-
-                    /** @var Schema $schema */
-                    $schema = Util::getChild($newParameter, Schema::class);
-
-                    $context = ContextHelper::getContext($reflectionProperty);
-
-                    $this->propertyDescriber->describe($schema, $context, ...$this->reflectionPreparer->getTypes($reflectionProperty));
+                if (!$attributeInstance instanceof Parameter) {
+                    continue;
                 }
+
+                $name = $attributeInstance->name;
+
+                if (Generator::UNDEFINED === $name || '' === $name) {
+                    $name = NameHelper::getName($reflectionProperty);
+                }
+
+                if (Generator::UNDEFINED === $attributeInstance->in || null === $attributeInstance->in || '' === $attributeInstance->in) {
+                    $attributeInstance->in = QueryParameterDescriber::IN;
+                }
+
+                /** @var bool|string $attributeInstanceRequired */
+                $attributeInstanceRequired = $attributeInstance->required;
+
+                if (Generator::UNDEFINED === $attributeInstanceRequired && $this->isRequired($reflectionProperty)) {
+                    $attributeInstance->required = true;
+                }
+
+                $newParameter = Util::getOperationParameter($operation, $name, $attributeInstance->in);
+                Util::merge($newParameter, $attributeInstance);
+
+                /** @var Schema $schema */
+                $schema = Util::getChild($newParameter, Schema::class);
+
+                $context = ContextHelper::getContext($reflectionProperty);
+
+                $this->propertyDescriber->describe($schema, $context, ...$this->reflectionPreparer->getTypes($reflectionProperty));
             }
         }
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     * @throws ReflectionException
-     */
-    private function searchAndDescribeFIleUploadType(Operation $operation, Type $type): void
-    {
-        $fileUploadProperties = $this->searchFileUploadProperties($type);
-
-        if ([] === $fileUploadProperties) {
-            return;
-        }
-
-        $uploadContent = new Schema([
-            'type' => 'object',
-            'properties' => $fileUploadProperties,
-        ]);
-
-        $request = Util::getChild($operation, RequestBody::class);
-
-        Util::merge($request, [
-            'content' => [
-                'multipart/form-data' => [
-                    'schema' => $uploadContent,
-                ],
-            ],
-        ]);
     }
 
     /**
@@ -228,6 +225,7 @@ class RequestDescriber implements OperationDescriberInterface
     private function isNotEmpty(Schema $schema): bool
     {
         return (Generator::UNDEFINED !== $schema->properties && [] !== $schema->properties)
-            || Generator::UNDEFINED !== $schema->ref;
+            || Generator::UNDEFINED !== $schema->ref
+            || Generator::UNDEFINED !== $schema->allOf;
     }
 }
