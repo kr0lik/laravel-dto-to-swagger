@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use Kr0lik\DtoToSwagger\Helper\Util;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriber;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\PropertyTypeDescriberInterface;
+use OpenApi\Annotations\AdditionalProperties;
 use OpenApi\Annotations\Items;
 use OpenApi\Annotations\Schema;
 use Symfony\Component\PropertyInfo\Type;
@@ -25,15 +26,22 @@ class ArrayDescriber implements PropertyTypeDescriberInterface
      */
     public function describe(Schema $property, array $context = [], Type ...$types): void
     {
-        $property->type = 'array';
-
-        /** @var Items $property */
-        $property = Util::getChild($property, Items::class);
-
         $type = $types[0]->getCollectionValueTypes()[0] ?? null;
 
         if (null === $type) {
             return;
+        }
+
+        $key = $types[0]->getCollectionKeyTypes()[0] ?? null;
+
+        if ($key?->getBuiltinType() === 'string') {
+            $property->type = 'object';
+            /** @var AdditionalProperties $property */
+            $property = Util::getChild($property, AdditionalProperties::class);
+        } else {
+            $property->type = 'array';
+            /** @var Items $property */
+            $property = Util::getChild($property, Items::class);
         }
 
         $this->propertyDescriber->describe($property, $context, $type);
