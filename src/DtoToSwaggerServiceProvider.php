@@ -24,6 +24,7 @@ use Kr0lik\DtoToSwagger\Processor\AbstractProcessor;
 use Kr0lik\DtoToSwagger\Processor\RoutePreparer;
 use Kr0lik\DtoToSwagger\Processor\RoutingProcessor;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\ArrayDescriber;
+use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\AssociativeArrayDescriber;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\BooleanDescriber;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\CompoundPropertyDescriber;
 use Kr0lik\DtoToSwagger\PropertyTypeDescriber\Describers\DateTimeDescriber;
@@ -241,6 +242,7 @@ class DtoToSwaggerServiceProvider extends ServiceProvider
                 EnumDescriber::class,
                 NullableDescriber::class,
                 ArrayDescriber::class,
+                AssociativeArrayDescriber::class,
                 CompoundPropertyDescriber::class,
                 ObjectDescriber::class,
             ];
