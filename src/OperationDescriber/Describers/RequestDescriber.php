@@ -76,7 +76,7 @@ class RequestDescriber implements OperationDescriberInterface
                 ]);
 
                 if ($this->isNotEmpty($mainSchema)) {
-                    $mainSchema = new Schema(["allOf" => [
+                    $mainSchema = new Schema(['allOf' => [
                         $mainSchema,
                         $multipartSchema,
                     ]]);
@@ -106,7 +106,6 @@ class RequestDescriber implements OperationDescriberInterface
             $this->searchAndDescribeParameters($operation, $types[0]);
         }
     }
-
 
     /**
      * @throws InvalidArgumentException
@@ -224,8 +223,11 @@ class RequestDescriber implements OperationDescriberInterface
 
     private function isNotEmpty(Schema $schema): bool
     {
+        /** @var string|array<Schema> $allOf */
+        $allOf = $schema->allOf;
+
         return (Generator::UNDEFINED !== $schema->properties && [] !== $schema->properties)
             || Generator::UNDEFINED !== $schema->ref
-            || Generator::UNDEFINED !== $schema->allOf;
+            || Generator::UNDEFINED !== $allOf;
     }
 }
