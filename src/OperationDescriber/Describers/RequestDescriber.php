@@ -67,12 +67,12 @@ class RequestDescriber implements OperationDescriberInterface
 
             $fileUploadProperties = $this->searchFileUploadProperties($types[0]);
 
-            if ([] !== $fileUploadProperties) {
+            if ([] !== $fileUploadProperties['properties']) {
                 $contentType = 'multipart/form-data';
 
                 $multipartSchema = new Schema([
                     'type' => 'object',
-                    'properties' => $fileUploadProperties,
+                    ...$fileUploadProperties
                 ]);
 
                 if ($this->isNotEmpty($mainSchema)) {
@@ -202,7 +202,13 @@ class RequestDescriber implements OperationDescriberInterface
 
         $fileUploadProperties = [];
 
+        $requiredProperties = [];
+
         foreach (ClassHelper::getVisiblePropertiesRecursively($reflectionClass) as $reflectionProperty) {
+            if ($this->isRequired($reflectionProperty)) {
+                $requiredProperties[] = $reflectionProperty->getName();
+            }
+
             if (
                 $reflectionProperty->getType() instanceof ReflectionNamedType
                 && (
@@ -218,7 +224,7 @@ class RequestDescriber implements OperationDescriberInterface
             }
         }
 
-        return $fileUploadProperties;
+        return ['properties' => $fileUploadProperties, 'required' => $requiredProperties];
     }
 
     private function isNotEmpty(Schema $schema): bool
